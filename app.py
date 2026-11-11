@@ -520,12 +520,14 @@ folium.Marker(
     icon=folium.Icon(color="green")
 ).add_to(start_map)
 
-map_data = st_folium(
-    start_map,
-    height=350,
-    width=900,
-    key="start_location_map"
-)
+_, map_column, _ = st.columns([1, 8, 1])
+with map_column:
+    map_data = st_folium(
+        start_map,
+        height=350,
+        width=850,
+        key="start_location_map"
+    )
 
 if map_data and map_data.get("last_clicked"):
 
@@ -829,12 +831,14 @@ if st.session_state.routes:
     if all_map_points:
         route_map.fit_bounds(all_map_points)
 
-    st_folium(
-        route_map,
-        height=500,
-        width=1000,
-        key="running_routes_map"
-    )
+    _, map_column, _ = st.columns([1, 8, 1])
+    with map_column:
+        st_folium(
+            route_map,
+            height=500,
+            width=850,
+            key="running_routes_map"
+        )
 
     # ======================================
     # RECOMMENDATIONS
