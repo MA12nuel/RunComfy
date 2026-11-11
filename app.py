@@ -23,13 +23,27 @@ st.markdown("""
 .runcomfy-banner {
     padding: 1rem 1.4rem;
     margin-bottom: 1.5rem;
-    border: 1px solid #c8ddca;
-    border-radius: 14px;
-    background: #e7f2e8;
+    border-radius: 12px;
+    background: #397451;
 }
-.runcomfy-banner h1 { color: #26372e; margin: 0; }
-.runcomfy-banner p { color: #40594a; margin: .3rem 0 0; }
+.runcomfy-banner h1 {
+    margin: 0;
+    color: white !important;
+}
+.runcomfy-banner p {
+    margin: .3rem 0 0;
+    color: #eef6ef !important;
+}
+
+h2 {
+    padding: .55rem .8rem;
+    border-left: 6px solid #397451;
+    border-radius: 8px;
+    background: #e2eee4;
+    color: #244b35 !important;
+}
 </style>
+
 <div class="runcomfy-banner">
     <h1>🏃 RunComfy</h1>
     <p>Find a comfortable running route in Switzerland 🇨🇭</p>
