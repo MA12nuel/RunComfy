@@ -1,198 +1,427 @@
-/* ==========================================
-   RUNCOMFY AI — FRESH SPORT DESIGN
-   ========================================== */
+/* ==========================================================
+   RUNCOMFY AI — style.css
+   Prinzip: Papier, Tinte, ein Grün. Keine Verläufe, keine
+   weichen Schatten, kleine Radien, klare Linien.
+   ========================================================== */
 
-/* GENERAL */
-.stApp {
-    background: linear-gradient(
-        180deg,
-        #F1FAF4 0%,
-        #FFFFFF 45%,
-        #F8FBF9 100%
-    );
-    color: #18382A;
+:root {
+    --paper:      #FAFAF6;   /* Seitenhintergrund, warmes Weiss */
+    --surface:    #FFFFFF;   /* Karten, Felder */
+    --ink:        #11211A;   /* Text, Überschriften */
+    --ink-soft:   #4D5C54;   /* Sekundärtext */
+    --ink-faint:  #6F7D75;   /* Platzhalter, Captions (noch gut lesbar) */
+    --line:       #DDE2DC;   /* Haarlinien */
+    --line-strong:#11211A;   /* betonte Linien */
+    --green:      #0C6B3C;   /* Markenfarbe, Buttons */
+    --green-dark: #084D2B;   /* Hover */
+    --lime:       #C8F03C;   /* einziger Akzent, sparsam */
+    --amber:      #E0A100;
+    --red:        #C8442B;
+    --radius:     8px;
+    --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
+            Helvetica, Arial, sans-serif;
 }
 
-.block-container {
-    max-width: 1250px;
-    padding: 2rem 2.5rem 4rem;
+/* ----------------------------------------------------------
+   GRUNDLAGE
+   ---------------------------------------------------------- */
+
+.stApp,
+[data-testid="stAppViewContainer"] {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font);
 }
 
-/* HEADINGS */
+[data-testid="stHeader"] {
+    background: transparent;
+}
+
+.block-container,
+[data-testid="stMainBlockContainer"] {
+    max-width: 1180px;
+    padding: 1.25rem 2rem 3rem;
+}
+
+/* Kompaktere Abstände, damit die Karte früher sichtbar ist */
+[data-testid="stVerticalBlock"] {
+    gap: 0.75rem;
+}
+
+p, li, label {
+    color: var(--ink);
+    line-height: 1.5;
+}
+
+a {
+    color: var(--green);
+    text-underline-offset: 3px;
+}
+
+/* ----------------------------------------------------------
+   ÜBERSCHRIFTEN
+   ---------------------------------------------------------- */
+
 h1, h2, h3 {
-    color: #173D2B !important;
-    font-family: "Arial", sans-serif;
-    font-weight: 750;
+    color: var(--ink) !important;
+    font-family: var(--font);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
 }
 
 h1 {
-    font-size: 3.2rem !important;
+    font-size: 2.4rem !important;
+    padding: 0 0 0.25rem !important;
 }
 
 h2 {
-    font-size: 1.8rem !important;
-    margin-top: 2rem;
+    font-size: 1.35rem !important;
+    margin-top: 1.5rem;
+    padding-top: 0.9rem !important;
+    border-top: 2px solid var(--line-strong);
 }
 
-/* CUSTOM TITLE */
+h3 {
+    font-size: 1.05rem !important;
+    font-weight: 700;
+}
+
+/* ----------------------------------------------------------
+   KOPFBEREICH (.main-title / .subtitle)
+   ---------------------------------------------------------- */
+
 .main-title {
-    font-size: clamp(2.4rem, 5vw, 4rem);
-    font-weight: 850;
-    color: #173D2B;
-    letter-spacing: -1.5px;
+    display: inline-block;
+    font-size: clamp(2rem, 4vw, 2.9rem);
+    font-weight: 900;
+    font-style: italic;            /* Vorwärtsneigung = Tempo */
+    letter-spacing: -0.045em;
+    line-height: 1;
+    color: var(--ink);
+    padding-bottom: 0.35rem;
+    border-bottom: 6px solid var(--lime);
 }
 
 .subtitle {
-    font-size: 1.15rem;
-    color: #5B7565;
-    margin-bottom: 2rem;
+    font-size: 1rem;
+    color: var(--ink-soft);
+    max-width: 60ch;
+    margin: 0.6rem 0 1.1rem;
 }
 
-/* BUTTONS */
-.stButton > button {
-    background: linear-gradient(
-        135deg,
-        #38B86A,
-        #16864B
-    ) !important;
+/* ----------------------------------------------------------
+   BUTTONS
+   ---------------------------------------------------------- */
 
-    color: white !important;
-    border: none !important;
-    border-radius: 14px !important;
-    padding: 0.75rem 1.6rem !important;
+.stButton > button,
+.stFormSubmitButton > button,
+.stDownloadButton > button {
+    background: var(--green) !important;
+    color: #FFFFFF !important;
+    border: 1px solid var(--green) !important;
+    border-radius: var(--radius) !important;
+    padding: 0.6rem 1.3rem !important;
+    min-height: 44px;
     font-weight: 700 !important;
-    box-shadow: 0 5px 14px rgba(35, 155, 83, 0.18);
-    transition: all 0.2s ease;
+    letter-spacing: 0.01em;
+    box-shadow: none !important;
+    transition: background-color 0.12s ease, transform 0.06s ease;
 }
 
-.stButton > button:hover {
-    background: #137A43 !important;
-    box-shadow: 0 7px 18px rgba(35, 155, 83, 0.25);
+/* Streamlit setzt den Text in ein <p> — deshalb war er dunkelgrün */
+.stButton > button p,
+.stButton > button span,
+.stButton > button div,
+.stFormSubmitButton > button p,
+.stDownloadButton > button p {
+    color: #FFFFFF !important;
+    font-weight: 700 !important;
 }
 
-/* INPUT FIELDS */
-.stTextInput input {
-    background-color: #FFFFFF !important;
-    border: 1px solid #D5E7D9 !important;
-    border-radius: 12px !important;
-    padding: 12px !important;
-    color: #173D2B !important;
+.stButton > button:hover,
+.stFormSubmitButton > button:hover,
+.stDownloadButton > button:hover {
+    background: var(--green-dark) !important;
+    border-color: var(--green-dark) !important;
 }
 
-.stTextInput input:focus {
-    border-color: #38B86A !important;
+.stButton > button:active,
+.stFormSubmitButton > button:active {
+    transform: translateY(1px);
 }
 
-/* SELECTBOXES */
+.stButton > button:focus-visible,
+.stFormSubmitButton > button:focus-visible {
+    outline: 3px solid var(--lime) !important;
+    outline-offset: 2px;
+}
+
+/* ----------------------------------------------------------
+   EINGABEFELDER
+   ---------------------------------------------------------- */
+
+/* Feldbeschriftungen: klein, versal, ruhig */
+[data-testid="stWidgetLabel"] p {
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft) !important;
+}
+
+.stTextInput div[data-baseweb="input"],
+.stNumberInput div[data-baseweb="input"],
 div[data-baseweb="select"] > div {
-    border-radius: 12px !important;
-    border-color: #D5E7D9 !important;
+    background: var(--surface) !important;
+    border: 1px solid #B9C2BB !important;
+    border-radius: var(--radius) !important;
+    min-height: 44px;
+    box-shadow: none !important;
 }
 
-/* SLIDERS */
+.stTextInput div[data-baseweb="base-input"],
+.stNumberInput div[data-baseweb="base-input"] {
+    background: transparent !important;
+}
+
+.stTextInput input,
+.stNumberInput input {
+    background: transparent !important;
+    border: none !important;
+    padding: 0.6rem 0.8rem !important;
+    color: var(--ink) !important;
+    font-size: 1rem;
+}
+
+/* Platzhalter deutlich lesbar */
+.stTextInput input::placeholder,
+.stNumberInput input::placeholder {
+    color: var(--ink-faint) !important;
+    opacity: 1 !important;
+}
+
+.stTextInput div[data-baseweb="input"]:focus-within,
+.stNumberInput div[data-baseweb="input"]:focus-within,
+div[data-baseweb="select"] > div:focus-within {
+    border-color: var(--green) !important;
+    box-shadow: 0 0 0 3px rgba(12, 107, 60, 0.18) !important;
+}
+
+/* ----------------------------------------------------------
+   SLIDER
+   ---------------------------------------------------------- */
+
 .stSlider {
-    padding: 0.5rem 0;
+    padding: 0.25rem 0;
 }
 
-/* METRIC CARDS */
+.stSlider [role="slider"] {
+    background: var(--green) !important;
+    border: 2px solid var(--surface) !important;
+    box-shadow: 0 0 0 1px var(--green) !important;
+}
+
+.stSlider [data-testid="stSliderThumbValue"],
+.stSlider [data-testid="stThumbValue"] {
+    color: var(--ink) !important;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------
+   KENNZAHLEN (st.metric)
+   ---------------------------------------------------------- */
+
 [data-testid="stMetric"] {
-    background: #FFFFFF;
-    padding: 22px;
-    border-radius: 18px;
-    border: 1px solid #E0EEE4;
-    box-shadow: 0 5px 20px rgba(20, 80, 45, 0.05);
+    background: var(--surface);
+    padding: 14px 16px 16px;
+    border: 1px solid var(--line);
+    border-top: 3px solid var(--ink);
+    border-radius: 0 0 var(--radius) var(--radius);
+    box-shadow: none;
 }
 
-[data-testid="stMetricLabel"] {
-    color: #66816F;
-    font-weight: 600;
+[data-testid="stMetricLabel"],
+[data-testid="stMetricLabel"] p {
+    color: var(--ink-soft) !important;
+    font-size: 0.72rem !important;
+    font-weight: 700 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
 }
 
 [data-testid="stMetricValue"] {
-    color: #173D2B;
+    color: var(--ink);
+    font-size: 2rem;
     font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    font-variant-numeric: tabular-nums;
 }
 
-/* ==========================================
-   MAP DESIGN
-   ========================================== */
+/* ----------------------------------------------------------
+   KARTE (Folium)
+   ---------------------------------------------------------- */
 
-/* Folium map container */
-div[data-testid="stCustomComponentV1"] {
-    width: 100%;
-    max-width: 100%;
-    border-radius: 20px;
-    overflow: hidden;
-    border: 1px solid #DCE9DF;
-    box-shadow: 0 8px 28px rgba(20, 80, 45, 0.08);
-}
-
-/* Embedded maps */
-iframe {
+iframe,
+[data-testid="stCustomComponentV1"],
+[data-testid="stIFrame"] {
     display: block;
     width: 100%;
     max-width: 100%;
-    border-radius: 18px;
-    border: none;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: none;
+    background: var(--surface);
 }
 
-/* ==========================================
-   RESULTS & FEEDBACK
-   ========================================== */
+/* ----------------------------------------------------------
+   ERGEBNISSE
+   Optional, für eigenes HTML via st.markdown(unsafe_allow_html=True):
 
-/* Success messages */
+   <div class="rc-result">
+     <div class="rc-score rc-high">87</div>
+     <div>
+       <div class="rc-result-title">Seeuferweg</div>
+       <div class="rc-result-meta">5,2 km · flach · 14 °C</div>
+     </div>
+   </div>
+   ---------------------------------------------------------- */
+
+.rc-result {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    margin-bottom: 8px;
+}
+
+.rc-score {
+    flex: 0 0 auto;
+    width: 52px;
+    height: 52px;
+    display: grid;
+    place-items: center;
+    border-radius: 6px;
+    font-size: 1.35rem;
+    font-weight: 800;
+    font-variant-numeric: tabular-nums;
+    letter-spacing: -0.02em;
+}
+
+.rc-high { background: var(--green); color: #FFFFFF; }
+.rc-mid  { background: var(--amber); color: var(--ink); }
+.rc-low  { background: var(--red);   color: #FFFFFF; }
+
+.rc-result-title {
+    font-weight: 700;
+    color: var(--ink);
+    line-height: 1.25;
+}
+
+.rc-result-meta {
+    font-size: 0.875rem;
+    color: var(--ink-soft);
+    font-variant-numeric: tabular-nums;
+}
+
+/* ----------------------------------------------------------
+   MELDUNGEN, FORTSCHRITT, TRENNER
+   ---------------------------------------------------------- */
+
 div[data-testid="stAlert"] {
-    border-radius: 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--line);
+    box-shadow: none;
 }
 
-/* Progress bars */
 .stProgress > div > div > div {
-    background-color: #32B76A;
-    border-radius: 10px;
+    background-color: var(--line);
+    border-radius: 2px;
 }
 
-/* Dividers */
+.stProgress > div > div > div > div {
+    background-color: var(--green);
+    border-radius: 2px;
+}
+
 hr {
-    border-color: #E2EEE5;
-    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 1.25rem 0;
 }
 
-/* Captions */
-.stCaption {
-    color: #718477;
+.stCaption,
+[data-testid="stCaptionContainer"],
+[data-testid="stCaptionContainer"] p {
+    color: var(--ink-faint) !important;
+    font-size: 0.82rem;
 }
 
-/* ==========================================
-   MOBILE RESPONSIVENESS
-   ========================================== */
+/* Expander und Tabs im selben Stil */
+[data-testid="stExpander"] details {
+    border: 1px solid var(--line);
+    border-radius: var(--radius);
+    background: var(--surface);
+}
+
+.stTabs [data-baseweb="tab"] {
+    font-weight: 700;
+    color: var(--ink-soft);
+}
+
+.stTabs [aria-selected="true"] {
+    color: var(--ink);
+}
+
+.stTabs [data-baseweb="tab-highlight"] {
+    background-color: var(--green);
+    height: 3px;
+}
+
+/* ----------------------------------------------------------
+   MOBIL
+   ---------------------------------------------------------- */
 
 @media (max-width: 768px) {
 
-    .block-container {
-        padding: 1.2rem 1rem 2rem;
+    .block-container,
+    [data-testid="stMainBlockContainer"] {
+        padding: 1rem 1rem 2rem;
     }
 
-    h1 {
-        font-size: 2.3rem !important;
-    }
-
-    h2 {
-        font-size: 1.5rem !important;
-    }
+    h1 { font-size: 1.9rem !important; }
+    h2 { font-size: 1.2rem !important; }
 
     .main-title {
-        font-size: 2.6rem;
+        font-size: 2rem;
+        border-bottom-width: 5px;
     }
 
     .subtitle {
-        font-size: 1rem;
+        font-size: 0.95rem;
+        margin-bottom: 0.9rem;
     }
 
     [data-testid="stMetric"] {
-        padding: 15px;
+        padding: 12px;
     }
 
-    iframe {
-        max-width: 100%;
+    [data-testid="stMetricValue"] {
+        font-size: 1.6rem;
     }
+
+    .stButton > button,
+    .stFormSubmitButton > button {
+        width: 100%;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * { transition: none !important; }
 }
