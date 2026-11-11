@@ -2,14 +2,14 @@ import streamlit as st
 import requests
 import folium
 import math
-import time
 
 from streamlit_folium import st_folium
+from shapely.geometry import Point, Polygon
 
 
-# =====================================
-# 1. APP SETTINGS
-# =====================================
+# ==========================================
+# 1. RUNCOMFY AI SETTINGS
+# ==========================================
 
 st.set_page_config(
     page_title="RunComfy AI",
@@ -20,27 +20,33 @@ st.set_page_config(
 st.title("🏃 RunComfy AI")
 st.write("Find your perfect running route in Switzerland 🇨🇭")
 
+# API keys from Streamlit Secrets
 ORS_KEY = st.secrets["ORS_API_KEY"]
+OVERPASS_KEY = st.secrets["OVERPASS_API_KEY"]
 
-# The overpass.ch key is saved for future use.
-# Forest data below uses the public OSM Overpass API.
-
+# Contact information should identify your app.
+# Replace the email with your own project contact.
 HEADERS = {
-    "User-Agent": "RunComfySchoolProject/1.0 (educational prototype)"
+    "User-Agent": "RunComfySchoolProject/1.0 (contact: your-email@example.com)"
 }
 
+# Default location: St. Gallen
+if "start" not in st.session_state:
+    st.session_state.start = (47.4245, 9.3767)
 
-# =====================================
+if "routes" not in st.session_state:
+    st.session_state.routes = []
+
+
+# ==========================================
 # 2. SWISS LOCATION SEARCH
-# =====================================
+# ==========================================
 
 @st.cache_data(ttl=86400)
 def search_location(address):
 
-    url = "https://nominatim.openstreetmap.org/search"
-
     response = requests.get(
-        url,
+        "https://nominatim.openstreetmap.org/search",
         params={
             "q": address,
             "format": "json",
@@ -48,7 +54,7 @@ def search_location(address):
             "limit": 1
         },
         headers=HEADERS,
-        timeout=15
+        timeout=20
     )
 
     response.raise_for_status()
@@ -63,12 +69,9 @@ def search_location(address):
     return None
 
 
-def in_switzerland(lat, lon):
-    # Rough bounding box; exact border check below.
-    if not (45.8 <= lat <= 47.9 and 5.9 <= lon <= 10.6):
-        return False
+@st.cache_data(ttl=86400)
+def is_swiss_location(lat, lon):
 
-    # Check country using reverse geocoding
     response = requests.get(
         "https://nominatim.openstreetmap.org/reverse",
         params={
@@ -78,7 +81,7 @@ def in_switzerland(lat, lon):
             "zoom": 3
         },
         headers=HEADERS,
-        timeout=15
+        timeout=20
     )
 
     response.raise_for_status()
@@ -91,9 +94,9 @@ def in_switzerland(lat, lon):
     )
 
 
-# =====================================
-# 3. WEATHER API
-# =====================================
+# ==========================================
+# 3. WEATHER
+# ==========================================
 
 @st.cache_data(ttl=1800)
 def get_weather(lat, lon):
@@ -103,19 +106,24 @@ def get_weather(lat, lon):
         params={
             "latitude": lat,
             "longitude": lon,
-            "current": "temperature_2m"
+            "current": [
+                "temperature_2m",
+                "apparent_temperature",
+                "precipitation",
+                "wind_speed_10m"
+            ]
         },
-        timeout=15
+        timeout=20
     )
 
     response.raise_for_status()
 
-    return response.json()["current"]["temperature_2m"]
+    return response.json()["current"]
 
 
-# =====================================
-# 4. AIR QUALITY API
-# =====================================
+# ==========================================
+# 4. AIR QUALITY
+# ==========================================
 
 @st.cache_data(ttl=1800)
 def get_air_quality(lat, lon):
@@ -125,21 +133,24 @@ def get_air_quality(lat, lon):
         params={
             "latitude": lat,
             "longitude": lon,
-            "current": "european_aqi"
+            "current": [
+                "european_aqi",
+                "pm2_5"
+            ]
         },
-        timeout=15
+        timeout=20
     )
 
     response.raise_for_status()
 
-    return response.json()["current"]["european_aqi"]
+    return response.json()["current"]
 
 
-# =====================================
-# 5. RUNNING ROUTES
-# =====================================
+# ==========================================
+# 5. OPENROUTESERVICE
+# ==========================================
 
-def get_route(lat, lon, distance, seed):
+def get_running_route(lat, lon, distance, seed):
 
     url = (
         "https://api.openrouteservice.org"
@@ -163,7 +174,7 @@ def get_route(lat, lon, distance, seed):
                 }
             }
         },
-        timeout=45
+        timeout=60
     )
 
     response.raise_for_status()
@@ -176,7 +187,7 @@ def get_route(lat, lon, distance, seed):
         feature["properties"]["summary"]["distance"] / 1000
     )
 
-    # Calculate uphill elevation gain
+    # Calculate elevation gain
     elevation_gain = 0
 
     for i in range(1, len(coordinates)):
@@ -194,31 +205,34 @@ def get_route(lat, lon, distance, seed):
     return {
         "coordinates": coordinates,
         "distance": actual_distance,
-        "elevation": elevation_gain
+        "elevation": round(elevation_gain)
     }
 
 
-# =====================================
-# 6. FOREST / SHADE ESTIMATION
-# =====================================
+# ==========================================
+# 6. OVERPASS.CH FOREST DATA
+# ==========================================
 
 @st.cache_data(ttl=86400)
-def get_forests(lat, lon):
+def get_forests(south, west, north, east):
 
     query = f"""
-    [out:json][timeout:15];
+    [out:json][timeout:25];
     (
-      way["landuse"="forest"](around:2500,{lat},{lon});
-      way["natural"="wood"](around:2500,{lat},{lon});
+      way["landuse"="forest"]({south},{west},{north},{east});
+      way["natural"="wood"]({south},{west},{north},{east});
     );
     out geom;
     """
 
     response = requests.post(
-        "https://overpass.kumi.systems/api/interpreter",
+        "https://overpass.ch/api/interpreter",
+        headers={
+            "X-API-Key": OVERPASS_KEY,
+            "User-Agent": HEADERS["User-Agent"]
+        },
         data={"data": query},
-        headers=HEADERS,
-        timeout=25
+        timeout=45
     )
 
     response.raise_for_status()
@@ -226,57 +240,70 @@ def get_forests(lat, lon):
     return response.json()["elements"]
 
 
+# ==========================================
+# 7. SHADE ESTIMATION
+# ==========================================
+
 def estimate_shade(route, forests):
 
-    if not forests:
-        return None
-
-    forest_points = []
+    polygons = []
 
     for forest in forests:
-        for point in forest.get("geometry", []):
-            forest_points.append(
-                (point["lat"], point["lon"])
-            )
 
-    if not forest_points:
+        geometry = forest.get("geometry", [])
+
+        if len(geometry) < 4:
+            continue
+
+        coordinates = [
+            (point["lon"], point["lat"])
+            for point in geometry
+        ]
+
+        # Only use closed forest polygons
+        if coordinates[0] != coordinates[-1]:
+            continue
+
+        polygon = Polygon(coordinates)
+
+        if polygon.is_valid and not polygon.is_empty:
+            polygons.append(polygon)
+
+    if not polygons:
         return None
 
-    # Sample route points
-    coordinates = route["coordinates"]
-    step = max(1, len(coordinates) // 60)
-    samples = coordinates[::step]
+    route_points = route["coordinates"]
 
-    shaded = 0
+    # Sample approximately 100 route points
+    step = max(1, len(route_points) // 100)
 
-    for lon, lat, *_ in samples:
+    samples = route_points[::step]
 
-        for forest_lat, forest_lon in forest_points:
+    inside_forest = 0
 
-            # Approximate distance in metres
-            dx = (
-                (lon - forest_lon)
-                * 111000
-                * math.cos(math.radians(lat))
-            )
+    for coordinate in samples:
 
-            dy = (lat - forest_lat) * 111000
+        point = Point(coordinate[0], coordinate[1])
 
-            if math.sqrt(dx**2 + dy**2) < 60:
-                shaded += 1
-                break
+        if any(
+            polygon.covers(point)
+            for polygon in polygons
+        ):
+            inside_forest += 1
 
-    return round(100 * shaded / len(samples))
+    shade = 100 * inside_forest / len(samples)
+
+    return round(shade)
 
 
-# =====================================
-# 7. RUNCOMFY SCORE
-# =====================================
+# ==========================================
+# 8. RUNCOMFY SCORE
+# ==========================================
 
 def calculate_score(
     route,
     target_distance,
-    level,
+    fitness,
     hill_preference,
     shade_preference,
     temperature,
@@ -284,23 +311,28 @@ def calculate_score(
     shade
 ):
 
-    # Distance score
-    distance_error = abs(
+    # Distance: maximum 30 points
+    distance_difference = abs(
         route["distance"] - target_distance
     )
 
     distance_score = max(
-        0, 100 - distance_error * 20
+        0,
+        30 - distance_difference * 6
     )
 
-    # Fitness / elevation score
-    limits = {
-        "Beginner": 15,
-        "Intermediate": 30,
-        "Advanced": 55
+    # Elevation: maximum 30 points
+    elevation_per_km = (
+        route["elevation"] / max(route["distance"], 0.1)
+    )
+
+    fitness_limits = {
+        "Beginner": 10,
+        "Intermediate": 25,
+        "Advanced": 45
     }
 
-    limit = limits[level]
+    limit = fitness_limits[fitness]
 
     if hill_preference == "Flat":
         limit *= 0.5
@@ -308,72 +340,64 @@ def calculate_score(
     elif hill_preference == "Hilly":
         limit *= 2
 
-    elevation_per_km = (
-        route["elevation"] / max(route["distance"], 0.1)
-    )
-
     elevation_score = max(
         0,
-        100 - max(0, elevation_per_km - limit) * 2
+        30 - max(0, elevation_per_km - limit)
     )
 
-    # Temperature score
+    # Temperature: maximum 15 points
     temperature_score = max(
         0,
-        100 - abs(temperature - 15) * 5
+        15 - abs(temperature - 15)
     )
 
-    # Air quality score
+    # Air quality: maximum 15 points
     air_score = max(
         0,
-        100 - max(0, aqi - 20) * 2
+        15 - max(0, aqi - 20) * 0.3
     )
 
-    # Shade score
+    # Shade: maximum 10 points
     if shade is None:
         shade_score = None
-    elif shade_preference == "High":
-        shade_score = shade
-    elif shade_preference == "Low":
-        shade_score = 100 - shade
-    else:
-        shade_score = 100
 
-    # Weighted score
-    components = [
-        (distance_score, 0.30),
-        (elevation_score, 0.30),
-        (temperature_score, 0.15),
-        (air_score, 0.15)
-    ]
+    elif shade_preference == "High":
+        shade_score = shade / 10
+
+    elif shade_preference == "Low":
+        shade_score = (100 - shade) / 10
+
+    else:
+        shade_score = 10
+
+    total = (
+        distance_score
+        + elevation_score
+        + temperature_score
+        + air_score
+    )
 
     if shade_score is not None:
-        components.append((shade_score, 0.10))
+        total += shade_score
+    else:
+        # Rescale the available 90 points to 100
+        total = total / 90 * 100
 
-    total_weight = sum(weight for _, weight in components)
-
-    score = sum(
-        value * weight for value, weight in components
-    ) / total_weight
-
-    return round(score)
+    return round(max(0, min(100, total)))
 
 
-# =====================================
-# 8. USER INPUT
-# =====================================
+# ==========================================
+# 9. USER INTERFACE
+# ==========================================
 
-st.subheader("📍 Choose your starting point")
+st.header("📍 Choose your starting point")
 
 address = st.text_input(
-    "Enter a Swiss address or location",
-    placeholder="e.g. Bahnhof St. Gallen, Chur, Zurich"
+    "Enter any Swiss address or location",
+    placeholder="e.g. Bahnhof Chur, St. Gallen, Zurich"
 )
 
-if "start" not in st.session_state:
-    st.session_state.start = (47.4245, 9.3767)
-
-if st.button("🔎 Search address"):
+if st.button("🔎 Search location"):
 
     if address.strip():
 
@@ -382,15 +406,18 @@ if st.button("🔎 Search address"):
 
             if location:
                 st.session_state.start = location
+                st.session_state.routes = []
                 st.success("Location found!")
+                st.rerun()
+
             else:
-                st.warning("Address not found in Switzerland.")
+                st.warning("Location not found in Switzerland.")
 
-        except Exception as e:
-            st.error(f"Location search failed: {e}")
+        except Exception as error:
+            st.error(f"Location search failed: {error}")
 
 
-st.write("Or click on the map to choose your start:")
+st.write("Or select your starting point on the map:")
 
 lat, lon = st.session_state.start
 
@@ -401,50 +428,74 @@ start_map = folium.Map(
 
 folium.Marker(
     [lat, lon],
-    tooltip="Current starting point"
+    tooltip="Starting point",
+    icon=folium.Icon(color="green")
 ).add_to(start_map)
 
-map_result = st_folium(
+map_data = st_folium(
     start_map,
-    height=300,
-    width=700,
-    key="start_map"
+    height=350,
+    width=900,
+    key="start_location_map"
 )
 
-if map_result and map_result.get("last_clicked"):
+if map_data and map_data.get("last_clicked"):
 
-    clicked = map_result["last_clicked"]
+    clicked = map_data["last_clicked"]
 
-    new_lat = clicked["lat"]
-    new_lon = clicked["lng"]
+    selected_lat = clicked["lat"]
+    selected_lon = clicked["lng"]
 
-    if st.button("📍 Use selected map location"):
+    st.write(
+        f"Selected: {selected_lat:.5f}, "
+        f"{selected_lon:.5f}"
+    )
+
+    if st.button("📍 Confirm starting point"):
 
         try:
-            if in_switzerland(new_lat, new_lon):
-                st.session_state.start = (new_lat, new_lon)
+            if is_swiss_location(
+                selected_lat,
+                selected_lon
+            ):
+
+                st.session_state.start = (
+                    selected_lat,
+                    selected_lon
+                )
+
+                st.session_state.routes = []
                 st.rerun()
+
             else:
-                st.warning("Please select a location in Switzerland.")
+                st.warning(
+                    "Please choose a location in Switzerland."
+                )
 
-        except Exception as e:
-            st.error(f"Location check failed: {e}")
+        except Exception as error:
+            st.error(f"Location check failed: {error}")
 
 
-st.subheader("🏃 Your running preferences")
+# ==========================================
+# 10. RUNNING PREFERENCES
+# ==========================================
+
+st.header("🏃 Your running preferences")
 
 col1, col2 = st.columns(2)
 
 with col1:
 
-    level = st.selectbox(
+    fitness = st.selectbox(
         "Fitness level",
         ["Beginner", "Intermediate", "Advanced"]
     )
 
     distance = st.slider(
-        "Running distance (km)",
-        2, 30, 5
+        "Desired running distance (km)",
+        min_value=2,
+        max_value=30,
+        value=5
     )
 
 with col2:
@@ -460,187 +511,319 @@ with col2:
     )
 
 
-# =====================================
-# 9. GENERATE ROUTES
-# =====================================
+# ==========================================
+# 11. GENERATE RUNNING ROUTES
+# ==========================================
 
 if st.button("🚀 Find my perfect running route"):
 
     lat, lon = st.session_state.start
 
-    with st.spinner("Finding your running routes..."):
+    with st.spinner("Analysing running routes..."):
 
         try:
 
-            temperature = get_weather(lat, lon)
-            aqi = get_air_quality(lat, lon)
+            # Weather
+            weather = get_weather(lat, lon)
 
-            st.subheader("🌤️ Current conditions")
+            temperature = weather["temperature_2m"]
+            feels_like = weather["apparent_temperature"]
+            wind = weather["wind_speed_10m"]
+            precipitation = weather["precipitation"]
 
-            c1, c2 = st.columns(2)
+            # Air quality
+            air = get_air_quality(lat, lon)
 
-            c1.metric(
-                "Temperature",
-                f"{temperature} °C"
-            )
+            aqi = air["european_aqi"]
+            pm25 = air["pm2_5"]
 
-            c2.metric(
-                "European Air Quality Index",
-                aqi
-            )
-
-            # Forest data is optional
-            try:
-                forests = get_forests(lat, lon)
-            except Exception:
-                forests = []
-
-            routes = []
-
-            # Try multiple seeds
-            for seed in [1, 2, 3, 4, 5, 6]:
-
-                if len(routes) == 3:
-                    break
-
-                try:
-                    route = get_route(
-                        lat, lon, distance, seed
-                    )
-
-                    # Avoid nearly identical routes
-                    if any(
-                        route["coordinates"] == r["coordinates"]
-                        for r in routes
-                    ):
-                        continue
-
-                    route["shade"] = estimate_shade(
-                        route, forests
-                    )
-
-                    route["score"] = calculate_score(
-                        route,
-                        distance,
-                        level,
-                        hill_preference,
-                        shade_preference,
-                        temperature,
-                        aqi,
-                        route["shade"]
-                    )
-
-                    routes.append(route)
-
-                except requests.exceptions.RequestException:
-                    continue
-
-            if not routes:
+            if temperature is None or aqi is None:
                 st.error(
-                    "No routes found. Try another starting "
-                    "point or a different distance."
+                    "Weather or air-quality data is unavailable."
                 )
                 st.stop()
 
-            # Best route first
+            # Generate routes
+            routes = []
+
+            errors = []
+
+            for seed in range(1, 9):
+
+                if len(routes) >= 3:
+                    break
+
+                try:
+
+                    route = get_running_route(
+                        lat,
+                        lon,
+                        distance,
+                        seed
+                    )
+
+                    # Avoid exact duplicates
+                    duplicate = any(
+                        route["coordinates"] == existing["coordinates"]
+                        for existing in routes
+                    )
+
+                    if duplicate:
+                        continue
+
+                    routes.append(route)
+
+                except Exception as error:
+                    errors.append(str(error))
+
+            if not routes:
+
+                st.error(
+                    "No running routes found. "
+                    "Try another location or distance."
+                )
+
+                if errors:
+                    st.code(errors[0])
+
+                st.stop()
+
+            # Get forest data for route area
+            all_coordinates = [
+                point
+                for route in routes
+                for point in route["coordinates"]
+            ]
+
+            lons = [p[0] for p in all_coordinates]
+            lats = [p[1] for p in all_coordinates]
+
+            south = min(lats) - 0.002
+            north = max(lats) + 0.002
+            west = min(lons) - 0.002
+            east = max(lons) + 0.002
+
+            forests = []
+            forest_error = None
+
+            try:
+
+                forests = get_forests(
+                    south,
+                    west,
+                    north,
+                    east
+                )
+
+            except Exception as error:
+                forest_error = str(error)
+
+            # Score routes
+            for route in routes:
+
+                if forest_error:
+                    route["shade"] = None
+                else:
+                    route["shade"] = estimate_shade(
+                        route,
+                        forests
+                    )
+
+                route["score"] = calculate_score(
+                    route,
+                    distance,
+                    fitness,
+                    hill_preference,
+                    shade_preference,
+                    temperature,
+                    aqi,
+                    route["shade"]
+                )
+
             routes.sort(
-                key=lambda r: r["score"],
+                key=lambda route: route["score"],
                 reverse=True
             )
 
-            # =====================================
-            # 10. RESULTS MAP
-            # =====================================
+            # Save results
+            st.session_state.routes = routes
 
-            st.subheader("🗺️ Your running routes")
+            st.session_state.weather = weather
+            st.session_state.air = air
 
-            route_map = folium.Map(
-                location=[lat, lon],
-                zoom_start=13
+            st.session_state.forest_error = forest_error
+
+        except Exception as error:
+
+            st.error(f"An error occurred: {error}")
+
+
+# ==========================================
+# 12. DISPLAY RESULTS
+# ==========================================
+
+if st.session_state.routes:
+
+    routes = st.session_state.routes
+
+    weather = st.session_state.weather
+    air = st.session_state.air
+
+    lat, lon = st.session_state.start
+
+    st.header("🌤️ Current running conditions")
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "Temperature",
+        f"{weather['temperature_2m']} °C"
+    )
+
+    c2.metric(
+        "Feels like",
+        f"{weather['apparent_temperature']} °C"
+    )
+
+    c3.metric(
+        "Air Quality Index",
+        air["european_aqi"]
+    )
+
+    c4.metric(
+        "Wind",
+        f"{weather['wind_speed_10m']} km/h"
+    )
+
+    st.write(
+        f"🌧️ Current precipitation: "
+        f"{weather['precipitation']} mm"
+    )
+
+    if st.session_state.get("forest_error"):
+
+        st.warning(
+            "Forest data could not be loaded. "
+            "Shade scoring is unavailable."
+        )
+
+        with st.expander("Technical details"):
+            st.code(st.session_state.forest_error)
+
+    # ======================================
+    # ROUTE MAP
+    # ======================================
+
+    st.header("🗺️ Your running routes")
+
+    route_map = folium.Map(
+        location=[lat, lon],
+        zoom_start=13
+    )
+
+    colors = ["green", "blue", "purple"]
+
+    all_map_points = []
+
+    for i, route in enumerate(routes):
+
+        points = [
+            [point[1], point[0]]
+            for point in route["coordinates"]
+        ]
+
+        all_map_points.extend(points)
+
+        folium.PolyLine(
+            points,
+            color=colors[i],
+            weight=6,
+            opacity=0.85,
+            tooltip=(
+                f"Route {i+1}: "
+                f"{route['distance']:.1f} km | "
+                f"Score {route['score']}/100"
+            )
+        ).add_to(route_map)
+
+    folium.Marker(
+        [lat, lon],
+        tooltip="Start / Finish",
+        icon=folium.Icon(color="red")
+    ).add_to(route_map)
+
+    if all_map_points:
+        route_map.fit_bounds(all_map_points)
+
+    st_folium(
+        route_map,
+        height=500,
+        width=1000,
+        key="running_routes_map"
+    )
+
+    # ======================================
+    # RECOMMENDATIONS
+    # ======================================
+
+    st.header("🏆 Your personalized recommendations")
+
+    medals = ["🥇", "🥈", "🥉"]
+
+    for i, route in enumerate(routes):
+
+        st.subheader(
+            f"{medals[i]} Route {i+1}"
+        )
+
+        col1, col2, col3 = st.columns(3)
+
+        col1.metric(
+            "Distance",
+            f"{route['distance']:.1f} km"
+        )
+
+        col2.metric(
+            "Elevation gain",
+            f"{route['elevation']} m"
+        )
+
+        col3.metric(
+            "RunComfy Score",
+            f"{route['score']}/100"
+        )
+
+        if route["shade"] is not None:
+
+            st.write(
+                f"🌳 Estimated route through mapped forest: "
+                f"{route['shade']}%"
             )
 
-            colors = ["green", "blue", "purple"]
+        else:
 
-            for i, route in enumerate(routes):
-
-                points = [
-                    [point[1], point[0]]
-                    for point in route["coordinates"]
-                ]
-
-                folium.PolyLine(
-                    points,
-                    color=colors[i],
-                    weight=6,
-                    tooltip=f"Route {i+1}"
-                ).add_to(route_map)
-
-            folium.Marker(
-                [lat, lon],
-                tooltip="Start / Finish",
-                icon=folium.Icon(color="red")
-            ).add_to(route_map)
-
-            st_folium(
-                route_map,
-                height=500,
-                width=900,
-                key="results_map"
+            st.write(
+                "🌳 Forest coverage: unavailable"
             )
 
-            # =====================================
-            # 11. ROUTE RECOMMENDATIONS
-            # =====================================
+        if i == 0:
 
-            st.subheader("🏆 Your recommendations")
-
-            for i, route in enumerate(routes):
-
-                st.markdown(
-                    f"### {'🥇' if i == 0 else '🏃'} "
-                    f"Route {i+1}"
-                )
-
-                c1, c2, c3 = st.columns(3)
-
-                c1.metric(
-                    "Distance",
-                    f"{route['distance']:.1f} km"
-                )
-
-                c2.metric(
-                    "Elevation gain",
-                    f"{route['elevation']:.0f} m"
-                )
-
-                c3.metric(
-                    "RunComfy Score",
-                    f"{route['score']}/100"
-                )
-
-                if route["shade"] is None:
-                    st.write("🌳 Shade: No estimate available")
-                else:
-                    st.write(
-                        f"🌳 Estimated forest proximity: "
-                        f"{route['shade']}%"
-                    )
-
-                if i == 0:
-                    st.success(
-                        "⭐ This is your best matching route!"
-                    )
-
-                st.divider()
-
-            st.caption(
-                "RunComfy scores are rule-based estimates. "
-                "Shade uses proximity to mapped forest points, "
-                "not actual sunlight measurements. "
-                "Weather and air quality are approximate "
-                "conditions near the starting point."
+            st.success(
+                "⭐ Best matching running route!"
             )
 
-        except Exception as e:
+        st.divider()
 
-            st.error(f"Something went wrong: {e}")
+    st.caption(
+        "RunComfy AI uses real routing, weather and "
+        "air-quality data. Scores are rule-based. "
+        "Forest coverage is only a proxy for shade. "
+        "Actual shade depends on sunlight, trees, "
+        "buildings and time of day."
+    )
+
+    st.caption(
+        "Map data © OpenStreetMap contributors. "
+        "Routing: openrouteservice. "
+        "Weather and air quality: Open-Meteo."
+    )
