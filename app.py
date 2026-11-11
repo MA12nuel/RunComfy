@@ -16,8 +16,43 @@ st.set_page_config(
     layout="wide"
 )
 
-st.title("🏃 RunComfy AI")
-st.write("Find your perfect running route in Switzerland 🇨🇭")
+# web design
+st.markdown("""
+<style>
+.stApp { background: #f4f7f2; }
+.main .block-container { max-width: 1200px; padding-top: 2rem; }
+
+.hero {
+    background: linear-gradient(120deg, #23483b, #718b69);
+    color: white;
+    padding: 2rem;
+    border-radius: 20px;
+    margin-bottom: 1.5rem;
+}
+.hero small { letter-spacing: 2px; text-transform: uppercase; }
+.hero h1 { color: white; margin: .5rem 0; }
+.hero p { color: #e5eee4; margin-bottom: 0; }
+
+[data-testid="stMetric"] {
+    background: white;
+    padding: 1rem;
+    border: 1px solid #e1e8e1;
+    border-radius: 16px;
+}
+.stButton > button {
+    background: #315d4a;
+    color: white;
+    border-radius: 10px;
+}
+</style>
+
+<div class="hero">
+    <small>Swiss alpine running 🇨🇭</small>
+    <h1>Run wild. Feel good.</h1>
+    <p>Find your next favorite route in the Swiss outdoors.</p>
+</div>
+""", unsafe_allow_html=True)
+
 
 # API keys from Streamlit Secrets
 ORS_KEY = st.secrets.get("ORS_API_KEY")
