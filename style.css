@@ -1,425 +1,366 @@
 /* ==========================================================
-   RUNCOMFY AI — style.css
-   Prinzip: Papier, Tinte, ein Grün. Keine Verläufe, keine
-   weichen Schatten, kleine Radien, klare Linien.
+   RUNCOMFY AI — style.css  (Version 2: Sand, Tinte, Limette)
+   Erkennungsmerkmal: sandfarbener Hintergrund statt Weiss.
+   Alle Regeln mit "html body" davor, damit sie den alten
+   Inline-Style-Block in app.py überstimmen.
    ========================================================== */
 
 :root {
-    --paper:      #FAFAF6;   /* Seitenhintergrund, warmes Weiss */
-    --surface:    #FFFFFF;   /* Karten, Felder */
-    --ink:        #11211A;   /* Text, Überschriften */
-    --ink-soft:   #4D5C54;   /* Sekundärtext */
-    --ink-faint:  #6F7D75;   /* Platzhalter, Captions (noch gut lesbar) */
-    --line:       #DDE2DC;   /* Haarlinien */
-    --line-strong:#11211A;   /* betonte Linien */
-    --green:      #0C6B3C;   /* Markenfarbe, Buttons */
-    --green-dark: #084D2B;   /* Hover */
-    --lime:       #C8F03C;   /* einziger Akzent, sparsam */
-    --amber:      #E0A100;
-    --red:        #C8442B;
-    --radius:     8px;
+    --sand:    #F1ECE1;
+    --card:    #FFFFFF;
+    --ink:     #141A16;
+    --ink-2:   #4A534D;
+    --ink-3:   #6A736D;
+    --forest:  #10382A;
+    --lime:    #C8F03C;
+    --lime-dk: #B2DB22;
+    --amber:   #E0A100;
+    --red:     #C8442B;
+    --hard:    4px 4px 0 var(--ink);
     --font: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue",
             Helvetica, Arial, sans-serif;
 }
 
-/* ----------------------------------------------------------
-   GRUNDLAGE
-   ---------------------------------------------------------- */
+/* ---------- GRUNDLAGE ---------- */
 
-.stApp,
-[data-testid="stAppViewContainer"] {
-    background: var(--paper);
-    color: var(--ink);
+html body,
+html body .stApp,
+html body [data-testid="stAppViewContainer"],
+html body [data-testid="stMain"] {
+    background: var(--sand) !important;
+    color: var(--ink) !important;
     font-family: var(--font);
 }
 
-[data-testid="stHeader"] {
-    background: transparent;
+html body [data-testid="stHeader"] {
+    background: transparent !important;
 }
 
-.block-container,
-[data-testid="stMainBlockContainer"] {
+html body .block-container,
+html body [data-testid="stMainBlockContainer"] {
     max-width: 1180px;
     padding: 1.25rem 2rem 3rem;
 }
 
-/* Kompaktere Abstände, damit die Karte früher sichtbar ist */
-[data-testid="stVerticalBlock"] {
-    gap: 0.75rem;
+html body [data-testid="stVerticalBlock"] {
+    gap: 0.8rem;
 }
 
-p, li, label {
-    color: var(--ink);
+html body p,
+html body li {
+    color: var(--ink) !important;
     line-height: 1.5;
 }
 
-a {
-    color: var(--green);
-    text-underline-offset: 3px;
+/* ---------- KOPFBALKEN ---------- */
+/* funktioniert mit dem alten Banner (.runcomfy-banner)
+   und mit dem neuen Titel (.main-title / .subtitle) */
+
+html body .runcomfy-banner {
+    background: var(--forest) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 6px !important;
+    box-shadow: var(--hard);
+    padding: 1.4rem 1.6rem 1.5rem !important;
+    margin-bottom: 1.25rem !important;
 }
 
-/* ----------------------------------------------------------
-   ÜBERSCHRIFTEN
-   ---------------------------------------------------------- */
+html body .runcomfy-banner h1 {
+    color: #FFFFFF !important;
+    font-size: clamp(2rem, 4.5vw, 3.2rem) !important;
+    font-weight: 900 !important;
+    font-style: italic;
+    letter-spacing: -0.04em;
+    line-height: 1 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
 
-h1, h2, h3 {
+html body .runcomfy-banner p {
+    color: var(--lime) !important;
+    font-weight: 600;
+    margin: 0.5rem 0 0 !important;
+}
+
+html body .main-title {
+    display: block;
+    background: var(--forest);
+    color: #FFFFFF !important;
+    border: 2px solid var(--ink);
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    padding: 1.4rem 1.6rem 0.3rem;
+    font-size: clamp(2rem, 4.5vw, 3.2rem);
+    font-weight: 900;
+    font-style: italic;
+    letter-spacing: -0.04em;
+    line-height: 1;
+}
+
+html body .subtitle {
+    background: var(--forest);
+    color: var(--lime) !important;
+    border: 2px solid var(--ink);
+    border-top: none;
+    border-radius: 0 0 6px 6px;
+    box-shadow: var(--hard);
+    padding: 0.3rem 1.6rem 1.4rem;
+    margin: 0 0 1.25rem !important;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+/* ---------- ÜBERSCHRIFTEN ---------- */
+
+html body h1,
+html body h2,
+html body h3 {
     color: var(--ink) !important;
     font-family: var(--font);
-    font-weight: 800;
+    font-weight: 800 !important;
     letter-spacing: -0.02em;
-    line-height: 1.1;
+    line-height: 1.15;
 }
 
-h1 {
-    font-size: 2.4rem !important;
-    padding: 0 0 0.25rem !important;
-}
-
-h2 {
-    font-size: 1.35rem !important;
-    margin-top: 1.5rem;
-    padding-top: 0.9rem !important;
-    border-top: 2px solid var(--line-strong);
-}
-
-h3 {
-    font-size: 1.05rem !important;
-    font-weight: 700;
-}
-
-/* ----------------------------------------------------------
-   KOPFBEREICH (.main-title / .subtitle)
-   ---------------------------------------------------------- */
-
-.main-title {
-    display: inline-block;
-    font-size: clamp(2rem, 4vw, 2.9rem);
-    font-weight: 900;
-    font-style: italic;            /* Vorwärtsneigung = Tempo */
-    letter-spacing: -0.045em;
-    line-height: 1;
-    color: var(--ink);
-    padding-bottom: 0.35rem;
-    border-bottom: 6px solid var(--lime);
-}
-
-.subtitle {
-    font-size: 1rem;
-    color: var(--ink-soft);
-    max-width: 60ch;
-    margin: 0.6rem 0 1.1rem;
-}
-
-/* ----------------------------------------------------------
-   BUTTONS
-   ---------------------------------------------------------- */
-
-.stButton > button,
-.stFormSubmitButton > button,
-.stDownloadButton > button {
-    background: var(--green) !important;
-    color: #FFFFFF !important;
-    border: 1px solid var(--green) !important;
-    border-radius: var(--radius) !important;
-    padding: 0.6rem 1.3rem !important;
-    min-height: 44px;
-    font-weight: 700 !important;
-    letter-spacing: 0.01em;
-    box-shadow: none !important;
-    transition: background-color 0.12s ease, transform 0.06s ease;
-}
-
-/* Streamlit setzt den Text in ein <p> — deshalb war er dunkelgrün */
-.stButton > button p,
-.stButton > button span,
-.stButton > button div,
-.stFormSubmitButton > button p,
-.stDownloadButton > button p {
-    color: #FFFFFF !important;
-    font-weight: 700 !important;
-}
-
-.stButton > button:hover,
-.stFormSubmitButton > button:hover,
-.stDownloadButton > button:hover {
-    background: var(--green-dark) !important;
-    border-color: var(--green-dark) !important;
-}
-
-.stButton > button:active,
-.stFormSubmitButton > button:active {
-    transform: translateY(1px);
-}
-
-.stButton > button:focus-visible,
-.stFormSubmitButton > button:focus-visible {
-    outline: 3px solid var(--lime) !important;
-    outline-offset: 2px;
-}
-
-/* ----------------------------------------------------------
-   EINGABEFELDER
-   ---------------------------------------------------------- */
-
-/* Feldbeschriftungen: klein, versal, ruhig */
-[data-testid="stWidgetLabel"] p {
-    font-size: 0.72rem !important;
-    font-weight: 700 !important;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    color: var(--ink-soft) !important;
-}
-
-.stTextInput div[data-baseweb="input"],
-.stNumberInput div[data-baseweb="input"],
-div[data-baseweb="select"] > div {
-    background: var(--surface) !important;
-    border: 1px solid #B9C2BB !important;
-    border-radius: var(--radius) !important;
-    min-height: 44px;
-    box-shadow: none !important;
-}
-
-.stTextInput div[data-baseweb="base-input"],
-.stNumberInput div[data-baseweb="base-input"] {
-    background: transparent !important;
-}
-
-.stTextInput input,
-.stNumberInput input {
+html body h2 {
+    font-size: 1.45rem !important;
     background: transparent !important;
     border: none !important;
-    padding: 0.6rem 0.8rem !important;
+    border-bottom: 3px solid var(--ink) !important;
+    border-radius: 0 !important;
+    padding: 0 0 0.45rem !important;
+    margin-top: 1.4rem !important;
+}
+
+html body h3 {
+    font-size: 1.1rem !important;
+}
+
+/* ---------- BUTTONS ---------- */
+
+html body .stButton > button,
+html body .stFormSubmitButton > button,
+html body .stDownloadButton > button {
+    background: var(--lime) !important;
     color: var(--ink) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 6px !important;
+    box-shadow: var(--hard) !important;
+    padding: 0.6rem 1.4rem !important;
+    min-height: 46px;
+    font-weight: 800 !important;
+    transition: transform 0.08s ease, box-shadow 0.08s ease;
+}
+
+html body .stButton > button p,
+html body .stButton > button span,
+html body .stFormSubmitButton > button p,
+html body .stDownloadButton > button p {
+    color: var(--ink) !important;
+    font-weight: 800 !important;
+}
+
+html body .stButton > button:hover,
+html body .stFormSubmitButton > button:hover {
+    background: var(--lime-dk) !important;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 var(--ink) !important;
+}
+
+html body .stButton > button:active,
+html body .stFormSubmitButton > button:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 var(--ink) !important;
+}
+
+html body .stButton > button:focus-visible {
+    outline: 3px solid var(--forest) !important;
+    outline-offset: 3px;
+}
+
+/* ---------- EINGABEFELDER ---------- */
+
+/* alte Rahmen um die ganzen Widgets entfernen */
+html body [data-testid="stTextInput"],
+html body [data-testid="stSelectbox"],
+html body [data-testid="stSlider"] {
+    background: transparent !important;
+    border: none !important;
+    border-radius: 0 !important;
+}
+
+html body [data-testid="stWidgetLabel"] p,
+html body label {
+    color: var(--ink-2) !important;
+    font-size: 0.74rem !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+}
+
+html body .stTextInput div[data-baseweb="input"],
+html body .stNumberInput div[data-baseweb="input"],
+html body div[data-baseweb="select"] > div {
+    background: var(--card) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 6px !important;
+    min-height: 46px;
+    box-shadow: none !important;
+}
+
+html body .stTextInput div[data-baseweb="base-input"] {
+    background: transparent !important;
+}
+
+html body .stTextInput input,
+html body .stNumberInput input {
+    background: transparent !important;
+    border: none !important;
+    color: var(--ink) !important;
+    padding: 0.6rem 0.8rem !important;
     font-size: 1rem;
 }
 
-/* Platzhalter deutlich lesbar */
-.stTextInput input::placeholder,
-.stNumberInput input::placeholder {
-    color: var(--ink-faint) !important;
+html body .stTextInput input::placeholder {
+    color: var(--ink-3) !important;
     opacity: 1 !important;
 }
 
-.stTextInput div[data-baseweb="input"]:focus-within,
-.stNumberInput div[data-baseweb="input"]:focus-within,
-div[data-baseweb="select"] > div:focus-within {
-    border-color: var(--green) !important;
-    box-shadow: 0 0 0 3px rgba(12, 107, 60, 0.18) !important;
+html body .stTextInput div[data-baseweb="input"]:focus-within,
+html body div[data-baseweb="select"] > div:focus-within {
+    box-shadow: 0 0 0 3px var(--lime) !important;
 }
 
-/* ----------------------------------------------------------
-   SLIDER
-   ---------------------------------------------------------- */
+/* ---------- SLIDER ---------- */
 
-.stSlider {
-    padding: 0.25rem 0;
+html body .stSlider [role="slider"] {
+    background: var(--lime) !important;
+    border: 2px solid var(--ink) !important;
+    box-shadow: none !important;
 }
 
-.stSlider [role="slider"] {
-    background: var(--green) !important;
-    border: 2px solid var(--surface) !important;
-    box-shadow: 0 0 0 1px var(--green) !important;
-}
-
-.stSlider [data-testid="stSliderThumbValue"],
-.stSlider [data-testid="stThumbValue"] {
+html body .stSlider [data-testid="stSliderThumbValue"],
+html body .stSlider [data-testid="stThumbValue"] {
     color: var(--ink) !important;
-    font-weight: 700;
-    font-variant-numeric: tabular-nums;
+    font-weight: 800;
 }
 
-/* ----------------------------------------------------------
-   KENNZAHLEN (st.metric)
-   ---------------------------------------------------------- */
+/* ---------- KENNZAHLEN ---------- */
 
-[data-testid="stMetric"] {
-    background: var(--surface);
+html body [data-testid="stMetric"] {
+    background: var(--card) !important;
+    border: 2px solid var(--ink) !important;
+    border-radius: 6px !important;
+    box-shadow: var(--hard);
     padding: 14px 16px 16px;
-    border: 1px solid var(--line);
-    border-top: 3px solid var(--ink);
-    border-radius: 0 0 var(--radius) var(--radius);
-    box-shadow: none;
 }
 
-[data-testid="stMetricLabel"],
-[data-testid="stMetricLabel"] p {
-    color: var(--ink-soft) !important;
+html body [data-testid="stMetricLabel"],
+html body [data-testid="stMetricLabel"] p {
+    color: var(--ink-2) !important;
     font-size: 0.72rem !important;
-    font-weight: 700 !important;
+    font-weight: 800 !important;
     letter-spacing: 0.08em;
     text-transform: uppercase;
 }
 
-[data-testid="stMetricValue"] {
-    color: var(--ink);
-    font-size: 2rem;
-    font-weight: 800;
+html body [data-testid="stMetricValue"],
+html body [data-testid="stMetricValue"] div {
+    color: var(--ink) !important;
+    font-size: 2.1rem;
+    font-weight: 900;
     letter-spacing: -0.03em;
     line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
 
-/* ----------------------------------------------------------
-   KARTE (Folium)
-   ---------------------------------------------------------- */
+/* ---------- KARTE ---------- */
 
-iframe,
-[data-testid="stCustomComponentV1"],
-[data-testid="stIFrame"] {
+html body iframe,
+html body [data-testid="stCustomComponentV1"],
+html body [data-testid="stIFrame"] {
     display: block;
     width: 100%;
     max-width: 100%;
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    overflow: hidden;
-    box-shadow: none;
-    background: var(--surface);
+    border: 2px solid var(--ink) !important;
+    border-radius: 6px !important;
+    box-shadow: var(--hard);
+    background: var(--card);
 }
 
-/* ----------------------------------------------------------
-   ERGEBNISSE
-   Optional, für eigenes HTML via st.markdown(unsafe_allow_html=True):
+/* ---------- ERGEBNISKARTEN (optional, eigenes HTML) ---------- */
 
-   <div class="rc-result">
-     <div class="rc-score rc-high">87</div>
-     <div>
-       <div class="rc-result-title">Seeuferweg</div>
-       <div class="rc-result-meta">5,2 km · flach · 14 °C</div>
-     </div>
-   </div>
-   ---------------------------------------------------------- */
-
-.rc-result {
+html body .rc-result {
     display: flex;
     align-items: center;
     gap: 14px;
-    background: var(--surface);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
     padding: 12px 14px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }
 
-.rc-score {
+html body .rc-score {
     flex: 0 0 auto;
-    width: 52px;
-    height: 52px;
+    width: 56px;
+    height: 56px;
     display: grid;
     place-items: center;
+    border: 2px solid var(--ink);
+    border-radius: 4px;
+    font-size: 1.4rem;
+    font-weight: 900;
+    font-variant-numeric: tabular-nums;
+}
+
+html body .rc-high { background: var(--lime);  color: var(--ink); }
+html body .rc-mid  { background: var(--amber); color: var(--ink); }
+html body .rc-low  { background: var(--red);   color: #FFFFFF; }
+
+html body .rc-result-title { font-weight: 800; color: var(--ink); }
+html body .rc-result-meta  { font-size: 0.875rem; color: var(--ink-2); }
+
+/* ---------- MELDUNGEN, TRENNER, CAPTIONS ---------- */
+
+html body div[data-testid="stAlert"] {
+    border: 2px solid var(--ink);
     border-radius: 6px;
-    font-size: 1.35rem;
-    font-weight: 800;
-    font-variant-numeric: tabular-nums;
-    letter-spacing: -0.02em;
 }
 
-.rc-high { background: var(--green); color: #FFFFFF; }
-.rc-mid  { background: var(--amber); color: var(--ink); }
-.rc-low  { background: var(--red);   color: #FFFFFF; }
-
-.rc-result-title {
-    font-weight: 700;
-    color: var(--ink);
-    line-height: 1.25;
+html body hr {
+    border: none !important;
+    border-top: 2px solid var(--ink) !important;
+    margin: 1.25rem 0 !important;
+    opacity: 0.15;
 }
 
-.rc-result-meta {
-    font-size: 0.875rem;
-    color: var(--ink-soft);
-    font-variant-numeric: tabular-nums;
-}
-
-/* ----------------------------------------------------------
-   MELDUNGEN, FORTSCHRITT, TRENNER
-   ---------------------------------------------------------- */
-
-div[data-testid="stAlert"] {
-    border-radius: var(--radius);
-    border: 1px solid var(--line);
-    box-shadow: none;
-}
-
-.stProgress > div > div > div {
-    background-color: var(--line);
-    border-radius: 2px;
-}
-
-.stProgress > div > div > div > div {
-    background-color: var(--green);
-    border-radius: 2px;
-}
-
-hr {
-    border: none;
-    border-top: 1px solid var(--line);
-    margin: 1.25rem 0;
-}
-
-.stCaption,
-[data-testid="stCaptionContainer"],
-[data-testid="stCaptionContainer"] p {
-    color: var(--ink-faint) !important;
+html body [data-testid="stCaptionContainer"],
+html body [data-testid="stCaptionContainer"] p {
+    color: var(--ink-3) !important;
     font-size: 0.82rem;
 }
 
-/* Expander und Tabs im selben Stil */
-[data-testid="stExpander"] details {
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: var(--surface);
+html body [data-testid="stExpander"] details {
+    background: var(--card);
+    border: 2px solid var(--ink);
+    border-radius: 6px;
 }
 
-.stTabs [data-baseweb="tab"] {
-    font-weight: 700;
-    color: var(--ink-soft);
-}
-
-.stTabs [aria-selected="true"] {
-    color: var(--ink);
-}
-
-.stTabs [data-baseweb="tab-highlight"] {
-    background-color: var(--green);
-    height: 3px;
-}
-
-/* ----------------------------------------------------------
-   MOBIL
-   ---------------------------------------------------------- */
+/* ---------- MOBIL ---------- */
 
 @media (max-width: 768px) {
 
-    .block-container,
-    [data-testid="stMainBlockContainer"] {
+    html body .block-container,
+    html body [data-testid="stMainBlockContainer"] {
         padding: 1rem 1rem 2rem;
     }
 
-    h1 { font-size: 1.9rem !important; }
-    h2 { font-size: 1.2rem !important; }
+    html body h2 { font-size: 1.2rem !important; }
 
-    .main-title {
-        font-size: 2rem;
-        border-bottom-width: 5px;
-    }
+    html body [data-testid="stMetricValue"] { font-size: 1.6rem; }
 
-    .subtitle {
-        font-size: 0.95rem;
-        margin-bottom: 0.9rem;
-    }
-
-    [data-testid="stMetric"] {
-        padding: 12px;
-    }
-
-    [data-testid="stMetricValue"] {
-        font-size: 1.6rem;
-    }
-
-    .stButton > button,
-    .stFormSubmitButton > button {
-        width: 100%;
-    }
+    html body .stButton > button { width: 100%; }
 }
 
 @media (prefers-reduced-motion: reduce) {
