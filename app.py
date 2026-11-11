@@ -19,32 +19,32 @@ st.set_page_config(
 # Web design
 # Simple, readable design
 # Bright, readable design
+# Bright, balanced design
 st.markdown("""
 <style>
-html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+html, body, .stApp, [data-testid="stAppViewContainer"],
+[data-testid="stMain"] {
     background: #ffffff !important;
     color: #26372e !important;
 }
-[data-testid="stHeader"] { background: transparent !important; }
 
 h1, h2, h3, p, label { color: #26372e !important; }
 
 .runcomfy-banner {
-    padding: 1rem 1.4rem;
+    padding: 1.2rem 1.5rem;
     margin-bottom: 1.5rem;
-    border: 1px solid #b9d8bd;
-    border-radius: 12px;
-    background: #dff0e1;
+    border: 1px solid #c8dfca;
+    border-radius: 14px;
+    background: #e7f2e8;
 }
-.runcomfy-banner h1, .runcomfy-banner p { color: #26372e !important; }
 .runcomfy-banner h1 { margin: 0; }
-.runcomfy-banner p { margin: .3rem 0 0; }
+.runcomfy-banner p { margin: .35rem 0 0; }
 
 h2 {
     padding: .55rem .8rem;
     border-left: 5px solid #397451;
     border-radius: 8px;
-    background: #e8f3e8;
+    background: #eef6ee;
 }
 
 [data-testid="stMetric"],
@@ -52,17 +52,25 @@ h2 {
 [data-testid="stSelectbox"],
 [data-testid="stSlider"] {
     background: #ffffff !important;
-    color: #26372e !important;
     border: 1px solid #dce5dc;
     border-radius: 12px;
 }
-[data-baseweb="select"] > div,
-input { background: #ffffff !important; color: #26372e !important; }
+[data-baseweb="select"] > div, input {
+    background: #ffffff !important;
+    color: #26372e !important;
+}
 
 .stButton > button {
     background: #397451 !important;
     color: #ffffff !important;
+    border: 0;
     border-radius: 8px;
+}
+
+[data-testid="stCustomComponentV1"] {
+    border: 1px solid #dce5dc;
+    border-radius: 12px;
+    overflow: hidden;
 }
 </style>
 
