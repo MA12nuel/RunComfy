@@ -19,14 +19,18 @@ st.set_page_config(
 st.title("🏃 RunComfy AI")
 st.write("Find your perfect running route in Switzerland 🇨🇭")
 
-# API keys from Streamlit Secrets
-ORS_KEY = st.secrets["ORS_API_KEY"]
-OVERPASS_KEY = st.secrets["OVERPASS_API_KEY"]
+ORS_KEY = st.secrets.get("ORS_API_KEY")
+OVERPASS_KEY = st.secrets.get("OVERPASS_API_KEY")
 
-# Contact information should identify your app.
-# Replace the email with your own project contact.
+if not ORS_KEY or not OVERPASS_KEY:
+    st.error(
+        "Missing API keys. Please add ORS_API_KEY and OVERPASS_API_KEY "
+        "to your Streamlit secrets."
+    )
+    st.stop()
+
 HEADERS = {
-    "User-Agent": "RunComfySchoolProject/1.0 (contact: your-email@example.com)"
+    "User-Agent": "RunComfySchoolProject/1.0 (contact: hello@runcomfy.app)"
 }
 
 # Default location: St. Gallen
