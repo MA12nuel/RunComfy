@@ -1,0 +1,198 @@
+/* ==========================================
+   RUNCOMFY AI — FRESH SPORT DESIGN
+   ========================================== */
+
+/* GENERAL */
+.stApp {
+    background: linear-gradient(
+        180deg,
+        #F1FAF4 0%,
+        #FFFFFF 45%,
+        #F8FBF9 100%
+    );
+    color: #18382A;
+}
+
+.block-container {
+    max-width: 1250px;
+    padding: 2rem 2.5rem 4rem;
+}
+
+/* HEADINGS */
+h1, h2, h3 {
+    color: #173D2B !important;
+    font-family: "Arial", sans-serif;
+    font-weight: 750;
+}
+
+h1 {
+    font-size: 3.2rem !important;
+}
+
+h2 {
+    font-size: 1.8rem !important;
+    margin-top: 2rem;
+}
+
+/* CUSTOM TITLE */
+.main-title {
+    font-size: clamp(2.4rem, 5vw, 4rem);
+    font-weight: 850;
+    color: #173D2B;
+    letter-spacing: -1.5px;
+}
+
+.subtitle {
+    font-size: 1.15rem;
+    color: #5B7565;
+    margin-bottom: 2rem;
+}
+
+/* BUTTONS */
+.stButton > button {
+    background: linear-gradient(
+        135deg,
+        #38B86A,
+        #16864B
+    ) !important;
+
+    color: white !important;
+    border: none !important;
+    border-radius: 14px !important;
+    padding: 0.75rem 1.6rem !important;
+    font-weight: 700 !important;
+    box-shadow: 0 5px 14px rgba(35, 155, 83, 0.18);
+    transition: all 0.2s ease;
+}
+
+.stButton > button:hover {
+    background: #137A43 !important;
+    box-shadow: 0 7px 18px rgba(35, 155, 83, 0.25);
+}
+
+/* INPUT FIELDS */
+.stTextInput input {
+    background-color: #FFFFFF !important;
+    border: 1px solid #D5E7D9 !important;
+    border-radius: 12px !important;
+    padding: 12px !important;
+    color: #173D2B !important;
+}
+
+.stTextInput input:focus {
+    border-color: #38B86A !important;
+}
+
+/* SELECTBOXES */
+div[data-baseweb="select"] > div {
+    border-radius: 12px !important;
+    border-color: #D5E7D9 !important;
+}
+
+/* SLIDERS */
+.stSlider {
+    padding: 0.5rem 0;
+}
+
+/* METRIC CARDS */
+[data-testid="stMetric"] {
+    background: #FFFFFF;
+    padding: 22px;
+    border-radius: 18px;
+    border: 1px solid #E0EEE4;
+    box-shadow: 0 5px 20px rgba(20, 80, 45, 0.05);
+}
+
+[data-testid="stMetricLabel"] {
+    color: #66816F;
+    font-weight: 600;
+}
+
+[data-testid="stMetricValue"] {
+    color: #173D2B;
+    font-weight: 800;
+}
+
+/* ==========================================
+   MAP DESIGN
+   ========================================== */
+
+/* Folium map container */
+div[data-testid="stCustomComponentV1"] {
+    width: 100%;
+    max-width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    border: 1px solid #DCE9DF;
+    box-shadow: 0 8px 28px rgba(20, 80, 45, 0.08);
+}
+
+/* Embedded maps */
+iframe {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 18px;
+    border: none;
+}
+
+/* ==========================================
+   RESULTS & FEEDBACK
+   ========================================== */
+
+/* Success messages */
+div[data-testid="stAlert"] {
+    border-radius: 14px;
+}
+
+/* Progress bars */
+.stProgress > div > div > div {
+    background-color: #32B76A;
+    border-radius: 10px;
+}
+
+/* Dividers */
+hr {
+    border-color: #E2EEE5;
+    margin: 2rem 0;
+}
+
+/* Captions */
+.stCaption {
+    color: #718477;
+}
+
+/* ==========================================
+   MOBILE RESPONSIVENESS
+   ========================================== */
+
+@media (max-width: 768px) {
+
+    .block-container {
+        padding: 1.2rem 1rem 2rem;
+    }
+
+    h1 {
+        font-size: 2.3rem !important;
+    }
+
+    h2 {
+        font-size: 1.5rem !important;
+    }
+
+    .main-title {
+        font-size: 2.6rem;
+    }
+
+    .subtitle {
+        font-size: 1rem;
+    }
+
+    [data-testid="stMetric"] {
+        padding: 15px;
+    }
+
+    iframe {
+        max-width: 100%;
+    }
+}
