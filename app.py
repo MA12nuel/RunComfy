@@ -17,39 +17,61 @@ st.set_page_config(
 )
 
 # web design
+# Web design
 st.markdown("""
 <style>
-.stApp { background: #f4f7f2; }
-.main .block-container { max-width: 1200px; padding-top: 2rem; }
-
+.stApp, [data-testid="stAppViewContainer"] {
+    background: #f4f7f2;
+    color: #20352c;
+}
+.main .block-container {
+    max-width: 1200px;
+    padding-top: 1.5rem;
+}
 .hero {
-    background: linear-gradient(120deg, #23483b, #718b69);
+    background: #315d4a;
     color: white;
-    padding: 2rem;
-    border-radius: 20px;
+    padding: 1.3rem 1.7rem;
+    border-radius: 14px;
     margin-bottom: 1.5rem;
 }
-.hero small { letter-spacing: 2px; text-transform: uppercase; }
-.hero h1 { color: white; margin: .5rem 0; }
-.hero p { color: #e5eee4; margin-bottom: 0; }
+.hero h1 { color: white; margin: .3rem 0; }
+.hero p { color: #e8f0e9; margin: 0; }
 
-[data-testid="stMetric"] {
-    background: white;
-    padding: 1rem;
-    border: 1px solid #e1e8e1;
-    border-radius: 16px;
+h2 {
+    padding-bottom: .4rem;
+    border-bottom: 2px solid #cbd9ce;
+    color: #20352c;
 }
+
+[data-testid="stTextInput"],
+[data-testid="stSelectbox"],
+[data-testid="stSlider"],
+[data-testid="stMetric"] {
+    padding: .7rem;
+    border: 1px solid #d5dfd6;
+    border-radius: 12px;
+    background: white;
+}
+[data-testid="stMetric"] { padding: 1rem; }
+[data-testid="stMetricLabel"] { color: #52665a; }
+
 .stButton > button {
     background: #315d4a;
     color: white;
-    border-radius: 10px;
+    border-radius: 9px;
+}
+[data-testid="stCustomComponentV1"] {
+    border: 1px solid #d5dfd6;
+    border-radius: 12px;
+    overflow: hidden;
 }
 </style>
 
 <div class="hero">
-    <small>Swiss alpine running 🇨🇭</small>
-    <h1>Run wild. Feel good.</h1>
-    <p>Find your next favorite route in the Swiss outdoors.</p>
+    <small>SWISS ALPINE RUNNING 🇨🇭</small>
+    <h1>RunComfy</h1>
+    <p>Find a route that feels good, wherever you start.</p>
 </div>
 """, unsafe_allow_html=True)
 
