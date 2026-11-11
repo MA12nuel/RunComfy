@@ -67,18 +67,7 @@ h2 {
     border-radius: 8px;
 }
 
-[data-testid="stCustomComponentV1"] {
-    width: 800px !important;
-    max-width: 100% !important;
-    margin: 0 auto !important;
-    background: white !important;
-    overflow: hidden;
-}
 
-[data-testid="stCustomComponentV1"] iframe {
-    max-width: 100% !important;
-    background: white !important;
-}
 </style>
 
 <div class="runcomfy-banner">
@@ -519,6 +508,8 @@ lat, lon = st.session_state.start
 start_map = folium.Map(
     location=[lat, lon],
     zoom_start=13,
+    width=800,
+    height=800,
     min_zoom=7,
     max_bounds=True,
     min_lat=45.7,
@@ -805,7 +796,9 @@ if st.session_state.routes:
 
     route_map = folium.Map(
         location=[lat, lon],
-        zoom_start=13
+        zoom_start=13,
+        width=800,
+        height=800
     )
 
     colors = ["green", "blue", "purple"]
