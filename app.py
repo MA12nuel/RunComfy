@@ -4,6 +4,7 @@ import folium
 import math
 
 from streamlit_folium import st_folium
+from shapely.geometry import Point, Polygon
 
 # ==========================================
 # 1. RUNCOMFY AI SETTINGS
@@ -251,28 +252,37 @@ def estimate_shade(route, forests):
         geometry = forest.get("geometry", [])
 
         if len(geometry) < 4:
+
             continue
 
         coordinates = [
+
             (point["lon"], point["lat"])
+
             for point in geometry
+
         ]
 
         # Only use closed forest polygons
+
         if coordinates[0] != coordinates[-1]:
+
             continue
 
         polygon = Polygon(coordinates)
 
         if polygon.is_valid and not polygon.is_empty:
+
             polygons.append(polygon)
 
     if not polygons:
+
         return None
 
     route_points = route["coordinates"]
 
     # Sample approximately 100 route points
+
     step = max(1, len(route_points) // 100)
 
     samples = route_points[::step]
@@ -284,9 +294,13 @@ def estimate_shade(route, forests):
         point = Point(coordinate[0], coordinate[1])
 
         if any(
+
             polygon.covers(point)
+
             for polygon in polygons
+
         ):
+
             inside_forest += 1
 
     shade = 100 * inside_forest / len(samples)
