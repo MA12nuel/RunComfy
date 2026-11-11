@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import folium
 import math
+from pathlib import Path
 
 from streamlit_folium import st_folium
 from shapely.geometry import Point, Polygon
@@ -15,6 +16,14 @@ st.set_page_config(
     page_icon="🏃",
     layout="wide"
 )
+# Load RunComfy AI design
+css_file = Path(__file__).parent / "style.css"
+
+with open(css_file, encoding="utf-8") as f:
+    st.markdown(
+        f"<style>{f.read()}</style>",
+        unsafe_allow_html=True
+    )
 
 # Web design
 # Simple, readable design
