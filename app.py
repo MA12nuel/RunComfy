@@ -18,29 +18,51 @@ st.set_page_config(
 
 # Web design
 # Simple, readable design
+# Bright, readable design
 st.markdown("""
 <style>
+.stApp, [data-testid="stAppViewContainer"] {
+    background: #f7faf6 !important;
+    color: #26372e !important;
+}
+[data-testid="stHeader"] { background: transparent !important; }
+
+h1, h2, h3, p, label { color: #26372e !important; }
+
 .runcomfy-banner {
     padding: 1rem 1.4rem;
     margin-bottom: 1.5rem;
+    border: 1px solid #b9d8bd;
     border-radius: 12px;
-    background: #397451;
+    background: #dff0e1;
 }
-.runcomfy-banner h1 {
-    margin: 0;
-    color: white !important;
-}
-.runcomfy-banner p {
-    margin: .3rem 0 0;
-    color: #eef6ef !important;
-}
+.runcomfy-banner h1, .runcomfy-banner p { color: #26372e !important; }
+.runcomfy-banner h1 { margin: 0; }
+.runcomfy-banner p { margin: .3rem 0 0; }
 
 h2 {
     padding: .55rem .8rem;
-    border-left: 6px solid #397451;
+    border-left: 5px solid #397451;
     border-radius: 8px;
-    background: #e2eee4;
-    color: #244b35 !important;
+    background: #e8f3e8;
+}
+
+[data-testid="stMetric"],
+[data-testid="stTextInput"],
+[data-testid="stSelectbox"],
+[data-testid="stSlider"] {
+    background: #ffffff !important;
+    color: #26372e !important;
+    border: 1px solid #dce5dc;
+    border-radius: 12px;
+}
+[data-baseweb="select"] > div,
+input { background: #ffffff !important; color: #26372e !important; }
+
+.stButton > button {
+    background: #397451 !important;
+    color: #ffffff !important;
+    border-radius: 8px;
 }
 </style>
 
