@@ -580,7 +580,7 @@ if st.button("🚀 Find my perfect running route"):
 
             for seed in range(1, 9):
                 if len(routes) >= 3:
-                     break
+                    break
 
                 try:
                     route = get_running_route(lat, lon, distance, seed)
@@ -588,22 +588,22 @@ if st.button("🚀 Find my perfect running route"):
                     duplicate = any(
                         route["coordinates"] == existing["coordinates"]
                         for existing in routes
-                     )
+                    )
 
                     if duplicate:
                         continue
 
-                     routes.append(route)
+                    routes.append(route)
 
-                 except Exception as error:
+                except Exception as error:
                     errors.append(f"Seed {seed}: {error}")
                     continue
 
             if not routes:
-                    st.error("No running routes found. Try another location or distance.")
-                    if errors:
-                        st.code("\n".join(errors[:3]))
-                    st.stop()
+                st.error("No running routes found. Try another location or distance.")
+                if errors:
+                    st.code("\n".join(errors[:3]))
+                st.stop()
 
             # Get forest data for route area
             all_coordinates = [
