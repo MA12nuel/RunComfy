@@ -2,4 +2,4 @@ streamlit
 requests
 folium
 streamlit-folium
-shapely
+shapely>=2.0
