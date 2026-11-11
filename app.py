@@ -17,26 +17,19 @@ st.set_page_config(
 )
 
 # web design
+
 # Web design
 st.markdown("""
 <style>
-.stApp, [data-testid="stAppViewContainer"] {
-    background: #f4f7f2;
-    color: #20352c;
-}
-.main .block-container {
-    max-width: 1200px;
-    padding-top: 1.5rem;
-}
 .hero {
-    background: #315d4a;
-    color: white;
-    padding: 1.3rem 1.7rem;
-    border-radius: 14px;
+    padding: 1.2rem 1.5rem;
     margin-bottom: 1.5rem;
+    border: 1px solid #cbd9ce;
+    border-radius: 14px;
+    background: #e8f0e8;
 }
-.hero h1 { color: white; margin: .3rem 0; }
-.hero p { color: #e8f0e9; margin: 0; }
+.hero h1 { color: #20352c; margin: .3rem 0; }
+.hero p { color: #40594a; margin: 0; }
 
 h2 {
     padding-bottom: .4rem;
@@ -44,23 +37,16 @@ h2 {
     color: #20352c;
 }
 
+[data-testid="stMetric"],
 [data-testid="stTextInput"],
 [data-testid="stSelectbox"],
-[data-testid="stSlider"],
-[data-testid="stMetric"] {
-    padding: .7rem;
+[data-testid="stSlider"] {
     border: 1px solid #d5dfd6;
     border-radius: 12px;
     background: white;
 }
 [data-testid="stMetric"] { padding: 1rem; }
-[data-testid="stMetricLabel"] { color: #52665a; }
 
-.stButton > button {
-    background: #315d4a;
-    color: white;
-    border-radius: 9px;
-}
 [data-testid="stCustomComponentV1"] {
     border: 1px solid #d5dfd6;
     border-radius: 12px;
