@@ -263,67 +263,58 @@ def get_forests(south, west, north, east):
 # ==========================================
 
 def estimate_shade(route, forests):
-
     polygons = []
 
     for forest in forests:
-
         geometry = forest.get("geometry", [])
 
-        if len(geometry) < 4:
-
+        if not geometry or len(geometry) < 3:
             continue
 
-        coordinates = [
+        coordinates = []
+        for point in geometry:
+            if not isinstance(point, dict):
+                continue
+            if "lon" in point and "lat" in point:
+                try:
+                    coordinates.append((float(point["lon"]), float(point["lat"])))
+                except (TypeError, ValueError):
+                    continue
 
-            (point["lon"], point["lat"])
-
-            for point in geometry
-
-        ]
-
-        # Only use closed forest polygons
+        if len(coordinates) < 3:
+            continue
 
         if coordinates[0] != coordinates[-1]:
-
-            continue
+            coordinates.append(coordinates[0])
 
         polygon = Polygon(coordinates)
 
         if polygon.is_valid and not polygon.is_empty:
-
             polygons.append(polygon)
 
     if not polygons:
-
         return None
 
     route_points = route["coordinates"]
 
-    # Sample approximately 100 route points
-
     step = max(1, len(route_points) // 100)
-
     samples = route_points[::step]
+
+    if not samples:
+        return None
 
     inside_forest = 0
 
     for coordinate in samples:
+        if len(coordinate) < 2:
+            continue
 
-        point = Point(coordinate[0], coordinate[1])
+        point = Point(float(coordinate[0]), float(coordinate[1]))
 
-        if any(
-
-            polygon.covers(point)
-
-            for polygon in polygons
-
-        ):
-
+        if any(polygon.covers(point) for polygon in polygons):
             inside_forest += 1
 
     shade = 100 * inside_forest / len(samples)
-
     return round(shade)
 
 
