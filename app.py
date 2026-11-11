@@ -19,6 +19,7 @@ st.set_page_config(
 st.title("🏃 RunComfy AI")
 st.write("Find your perfect running route in Switzerland 🇨🇭")
 
+# API keys from Streamlit Secrets
 ORS_KEY = st.secrets.get("ORS_API_KEY")
 OVERPASS_KEY = st.secrets.get("OVERPASS_API_KEY")
 
@@ -396,6 +397,10 @@ def calculate_score(
 
     elif shade_preference == "Low":
         shade_score = (100 - shade) / 10
+
+    elif shade_preference == "Medium":
+# prefer a moderate amount of shade
+        shade_score = max(0, 10 - abs(shade - 50) / 5)
 
     else:
         shade_score = 10
