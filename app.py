@@ -50,7 +50,8 @@ def search_location(address):
             "searchText": address,
             "type": "locations",
             "origins": "address",
-            "limit": 5
+            "limit": 5,
+            "sr": 4326
         },
         timeout=20
     )
@@ -62,26 +63,11 @@ def search_location(address):
     if not results:
         return None
 
-    # GeoAdmin returns coordinates in Web Mercator
     attributes = results[0]["attrs"]
 
-    x = float(attributes["x"])
-    y = float(attributes["y"])
-
-    # Convert Web Mercator to WGS84
-    lon = x / 20037508.34 * 180
-
-    lat = (
-        180 / math.pi
-        * (
-            2 * math.atan(
-                math.exp(
-                    y / 20037508.34 * math.pi
-                )
-            )
-            - math.pi / 2
-        )
-    )
+    # Coordinates in WGS84
+    lat = float(attributes["lat"])
+    lon = float(attributes["lon"])
 
     return lat, lon
 def is_swiss_location(lat, lon):
