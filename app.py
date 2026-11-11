@@ -237,16 +237,15 @@ def get_forests(south, west, north, east):
     out geom;
     """
 
-    response = requests.post(
-        "https://overpass.ch/api/interpreter",
-        headers={
-            "X-API-Key": OVERPASS_KEY,
-            "User-Agent": HEADERS["User-Agent"]
-        },
-        data={"data": query},
-        timeout=45
-    )
-
+  response = requests.post(
+    "https://api.overpass.ch/v1/interpreter",
+    headers={
+        "X-API-Key": OVERPASS_KEY,
+        "User-Agent": HEADERS["User-Agent"]
+    },
+    data={"data": query},
+    timeout=45
+)
     response.raise_for_status()
 
     return response.json()["elements"]
