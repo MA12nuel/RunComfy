@@ -21,8 +21,8 @@ st.set_page_config(
 # Bright, readable design
 st.markdown("""
 <style>
-.stApp, [data-testid="stAppViewContainer"] {
-    background: #f7faf6 !important;
+html, body, .stApp, [data-testid="stAppViewContainer"], [data-testid="stMain"] {
+    background: #ffffff !important;
     color: #26372e !important;
 }
 [data-testid="stHeader"] { background: transparent !important; }
