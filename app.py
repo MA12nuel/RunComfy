@@ -68,9 +68,16 @@ h2 {
 }
 
 [data-testid="stCustomComponentV1"] {
-    border: 1px solid #dce5dc;
-    border-radius: 12px;
+    width: 800px !important;
+    max-width: 100% !important;
+    margin: 0 auto !important;
+    background: white !important;
     overflow: hidden;
+}
+
+[data-testid="stCustomComponentV1"] iframe {
+    max-width: 100% !important;
+    background: white !important;
 }
 </style>
 
