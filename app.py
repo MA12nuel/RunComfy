@@ -462,9 +462,14 @@ lat, lon = st.session_state.start
 
 start_map = folium.Map(
     location=[lat, lon],
-    zoom_start=13
+    zoom_start=13,
+    min_zoom=7,
+    max_bounds=True,
+    min_lat=45.7,
+    max_lat=47.9,
+    min_lon=5.8,
+    max_lon=10.7
 )
-
 folium.Marker(
     [lat, lon],
     tooltip="Starting point",
