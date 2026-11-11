@@ -4,8 +4,6 @@ import folium
 import math
 
 from streamlit_folium import st_folium
-from shapely.geometry import Point, Polygon
-
 
 # ==========================================
 # 1. RUNCOMFY AI SETTINGS
