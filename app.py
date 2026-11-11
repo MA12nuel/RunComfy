@@ -80,9 +80,6 @@ h2 {
 </div>
 """, unsafe_allow_html=True)
 
-st.title("🏃 RunComfy")
-st.caption("Find a comfortable running route in Switzerland 🇨🇭")
-
 
 # API keys from Streamlit Secrets
 ORS_KEY = st.secrets.get("ORS_API_KEY")
@@ -531,8 +528,8 @@ folium.Marker(
 
 map_data = st_folium(
     start_map,
-    height=350,
-    width=1000,
+    height=800,
+    width=800,
     key="start_location_map"
 )
 
@@ -841,8 +838,8 @@ if st.session_state.routes:
     
     st_folium(
         route_map,
-        height=500,
-        width=1000,
+        height=800,
+        width=800,
         key="running_routes_map"
     )
 
