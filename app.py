@@ -45,53 +45,80 @@ if "routes" not in st.session_state:
 def search_location(address):
 
     response = requests.get(
-        "https://nominatim.openstreetmap.org/search",
+        "https://api3.geo.admin.ch/rest/services/api/SearchServer",
         params={
-            "q": address,
-            "format": "json",
-            "countrycodes": "ch",
-            "limit": 1
+            "searchText": address,
+            "type": "locations",
+            "origins": "address",
+            "limit": 5
         },
-        headers=HEADERS,
         timeout=20
     )
 
     response.raise_for_status()
-    results = response.json()
 
-    if results:
-        return (
-            float(results[0]["lat"]),
-            float(results[0]["lon"])
+    results = response.json().get("results", [])
+
+    if not results:
+        return None
+
+    # GeoAdmin returns coordinates in Web Mercator
+    attributes = results[0]["attrs"]
+
+    x = float(attributes["x"])
+    y = float(attributes["y"])
+
+    # Convert Web Mercator to WGS84
+    lon = x / 20037508.34 * 180
+
+    lat = (
+        180 / math.pi
+        * (
+            2 * math.atan(
+                math.exp(
+                    y / 20037508.34 * math.pi
+                )
+            )
+            - math.pi / 2
         )
+    )
 
-    return None
-
-
-@st.cache_data(ttl=86400)
+    return lat, lon
 def is_swiss_location(lat, lon):
 
     response = requests.get(
-        "https://nominatim.openstreetmap.org/reverse",
+
+        "https://api3.geo.admin.ch/rest/services/api/MapServer/identify",
+
         params={
-            "lat": lat,
-            "lon": lon,
-            "format": "json",
-            "zoom": 3
+
+            "geometry": f"{lon},{lat}",
+
+            "geometryType": "esriGeometryPoint",
+
+            "imageDisplay": "500,500,96",
+
+            "mapExtent": f"{lon-0.01},{lat-0.01},{lon+0.01},{lat+0.01}",
+
+            "tolerance": 1,
+
+            "layers": "all:ch.swisstopo.swissboundaries3d-land-flaeche.fill",
+
+            "sr": 4326,
+
+            "returnGeometry": "false"
+
         },
-        headers=HEADERS,
+
         timeout=20
+
     )
 
     response.raise_for_status()
 
-    return (
-        response.json()
-        .get("address", {})
-        .get("country_code", "")
-        .lower() == "ch"
-    )
+    results = response.json().get("results", [])
 
+    return len(results) > 0
 
 # ==========================================
 # 3. WEATHER
