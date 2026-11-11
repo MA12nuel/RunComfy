@@ -500,7 +500,7 @@ with map_column:
     map_data = st_folium(
         start_map,
         height=350,
-        width=850,
+        width=1000,
         key="start_location_map"
     )
 
@@ -811,7 +811,7 @@ if st.session_state.routes:
         st_folium(
             route_map,
             height=500,
-            width=850,
+            width=1000,
             key="running_routes_map"
         )
 
