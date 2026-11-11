@@ -179,6 +179,7 @@ def get_running_route(lat, lon, distance, seed):
             "coordinates": [[lon, lat]],
             "elevation": True,
             "options": {
+                "avoid_features": ["ferries"],
                 "round_trip": {
                     "length": distance * 1000,
                     "points": 5,
