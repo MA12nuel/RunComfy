@@ -525,6 +525,7 @@ folium.Marker(
 map_data = st_folium(
     start_map,
     height=800,
+    use_container_width=True,
     key="start_location_map"
 )
 
@@ -834,9 +835,9 @@ if st.session_state.routes:
     st_folium(
         route_map,
         height=800,
+        use_container_width=True,
         key="running_routes_map"
     )
-
     # ======================================
     # RECOMMENDATIONS
     # ======================================
