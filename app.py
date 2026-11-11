@@ -16,77 +16,39 @@ st.set_page_config(
     layout="wide"
 )
 
-# web design
-
 # Web design
-# Web design
+# Simple, readable design
 st.markdown("""
 <style>
-:root { color-scheme: light; }
+.stApp { background: #f7f9f6; }
+.main .block-container { max-width: 1100px; padding-top: 2rem; }
 
-[data-testid="stAppViewContainer"], .stApp {
-    background: #f4f8f3 !important;
-    color: #20352c !important;
-}
+h1, h2, h3, p, label { color: #26372e; }
 
-.hero {
-    padding: 1.3rem 1.6rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid #b9ddc7;
-    border-radius: 16px;
-    background: linear-gradient(110deg, #d9f0e2, #e1f1ff);
-}
-.hero h1, .hero p, .hero small { color: #20352c !important; }
-.hero h1 { margin: .3rem 0; }
-.hero p { margin: 0; }
-
-h2, h3, label, [data-testid="stMarkdownContainer"] p {
-    color: #20352c !important;
-}
-h2 {
-    padding-bottom: .4rem;
-    border-bottom: 2px solid #b9ddc7;
-}
-
-[data-testid="stMetric"],
-[data-testid="stTextInput"],
-[data-testid="stSelectbox"],
-[data-testid="stSlider"] {
-    padding: .8rem;
-    border: 1px solid #c8dfcf;
-    border-radius: 14px;
-    background: #ffffff !important;
-    color: #20352c !important;
-}
-
-[data-baseweb="select"] > div,
-[data-baseweb="popover"],
-[data-baseweb="menu"],
-input {
-    background: #ffffff !important;
-    color: #20352c !important;
+[data-testid="stMetric"] {
+    background: white;
+    border: 1px solid #dce5dc;
+    border-radius: 12px;
+    padding: 1rem;
 }
 
 .stButton > button {
-    background: #e47755 !important;
-    color: #ffffff !important;
+    background: #397451;
+    color: white;
     border: 0;
-    border-radius: 10px;
+    border-radius: 8px;
 }
 
 [data-testid="stCustomComponentV1"] {
-    border: 2px solid #c8dfcf;
-    border-radius: 14px;
+    border: 1px solid #dce5dc;
+    border-radius: 12px;
     overflow: hidden;
 }
 </style>
-
-<div class="hero">
-    <small>SWISS ALPINE RUNNING 🇨🇭</small>
-    <h1>RunComfy</h1>
-    <p>Find a route that feels good, wherever you start.</p>
-</div>
 """, unsafe_allow_html=True)
+
+st.title("🏃 RunComfy")
+st.caption("Find a comfortable running route in Switzerland 🇨🇭")
 
 
 # API keys from Streamlit Secrets
