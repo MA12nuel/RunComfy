@@ -508,8 +508,6 @@ lat, lon = st.session_state.start
 start_map = folium.Map(
     location=[lat, lon],
     zoom_start=13,
-    width=800,
-    height=800,
     min_zoom=7,
     max_bounds=True,
     min_lat=45.7,
@@ -527,7 +525,6 @@ folium.Marker(
 map_data = st_folium(
     start_map,
     height=800,
-    width=800,
     key="start_location_map"
 )
 
@@ -797,8 +794,6 @@ if st.session_state.routes:
     route_map = folium.Map(
         location=[lat, lon],
         zoom_start=13,
-        width=800,
-        height=800
     )
 
     colors = ["green", "blue", "purple"]
@@ -839,7 +834,6 @@ if st.session_state.routes:
     st_folium(
         route_map,
         height=800,
-        width=800,
         key="running_routes_map"
     )
 
