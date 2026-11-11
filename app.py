@@ -19,37 +19,64 @@ st.set_page_config(
 # web design
 
 # Web design
+# Web design
 st.markdown("""
 <style>
-.hero {
-    padding: 1.2rem 1.5rem;
-    margin-bottom: 1.5rem;
-    border: 1px solid #cbd9ce;
-    border-radius: 14px;
-    background: #e8f0e8;
-}
-.hero h1 { color: #20352c; margin: .3rem 0; }
-.hero p { color: #40594a; margin: 0; }
+:root { color-scheme: light; }
 
+[data-testid="stAppViewContainer"], .stApp {
+    background: #f4f8f3 !important;
+    color: #20352c !important;
+}
+
+.hero {
+    padding: 1.3rem 1.6rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #b9ddc7;
+    border-radius: 16px;
+    background: linear-gradient(110deg, #d9f0e2, #e1f1ff);
+}
+.hero h1, .hero p, .hero small { color: #20352c !important; }
+.hero h1 { margin: .3rem 0; }
+.hero p { margin: 0; }
+
+h2, h3, label, [data-testid="stMarkdownContainer"] p {
+    color: #20352c !important;
+}
 h2 {
     padding-bottom: .4rem;
-    border-bottom: 2px solid #cbd9ce;
-    color: #20352c;
+    border-bottom: 2px solid #b9ddc7;
 }
 
 [data-testid="stMetric"],
 [data-testid="stTextInput"],
 [data-testid="stSelectbox"],
 [data-testid="stSlider"] {
-    border: 1px solid #d5dfd6;
-    border-radius: 12px;
-    background: white;
+    padding: .8rem;
+    border: 1px solid #c8dfcf;
+    border-radius: 14px;
+    background: #ffffff !important;
+    color: #20352c !important;
 }
-[data-testid="stMetric"] { padding: 1rem; }
+
+[data-baseweb="select"] > div,
+[data-baseweb="popover"],
+[data-baseweb="menu"],
+input {
+    background: #ffffff !important;
+    color: #20352c !important;
+}
+
+.stButton > button {
+    background: #e47755 !important;
+    color: #ffffff !important;
+    border: 0;
+    border-radius: 10px;
+}
 
 [data-testid="stCustomComponentV1"] {
-    border: 1px solid #d5dfd6;
-    border-radius: 12px;
+    border: 2px solid #c8dfcf;
+    border-radius: 14px;
     overflow: hidden;
 }
 </style>
