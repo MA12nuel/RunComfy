@@ -20,31 +20,20 @@ st.set_page_config(
 # Simple, readable design
 st.markdown("""
 <style>
-.stApp { background: #f7f9f6; }
-.main .block-container { max-width: 1100px; padding-top: 2rem; }
-
-h1, h2, h3, p, label { color: #26372e; }
-
-[data-testid="stMetric"] {
-    background: white;
-    border: 1px solid #dce5dc;
-    border-radius: 12px;
-    padding: 1rem;
+.runcomfy-banner {
+    padding: 1rem 1.4rem;
+    margin-bottom: 1.5rem;
+    border: 1px solid #c8ddca;
+    border-radius: 14px;
+    background: #e7f2e8;
 }
-
-.stButton > button {
-    background: #397451;
-    color: white;
-    border: 0;
-    border-radius: 8px;
-}
-
-[data-testid="stCustomComponentV1"] {
-    border: 1px solid #dce5dc;
-    border-radius: 12px;
-    overflow: hidden;
-}
+.runcomfy-banner h1 { color: #26372e; margin: 0; }
+.runcomfy-banner p { color: #40594a; margin: .3rem 0 0; }
 </style>
+<div class="runcomfy-banner">
+    <h1>🏃 RunComfy</h1>
+    <p>Find a comfortable running route in Switzerland 🇨🇭</p>
+</div>
 """, unsafe_allow_html=True)
 
 st.title("🏃 RunComfy")
@@ -495,14 +484,13 @@ folium.Marker(
     icon=folium.Icon(color="green")
 ).add_to(start_map)
 
-_, map_column, _ = st.columns([1, 8, 1])
-with map_column:
-    map_data = st_folium(
-        start_map,
-        height=350,
-        width=1000,
-        key="start_location_map"
-    )
+
+map_data = st_folium(
+    start_map,
+    height=350,
+    width=1000,
+    key="start_location_map"
+)
 
 if map_data and map_data.get("last_clicked"):
 
@@ -806,14 +794,13 @@ if st.session_state.routes:
     if all_map_points:
         route_map.fit_bounds(all_map_points)
 
-    _, map_column, _ = st.columns([1, 8, 1])
-    with map_column:
-        st_folium(
-            route_map,
-            height=500,
-            width=1000,
-            key="running_routes_map"
-        )
+    
+    st_folium(
+        route_map,
+        height=500,
+        width=1000,
+        key="running_routes_map"
+    )
 
     # ======================================
     # RECOMMENDATIONS
