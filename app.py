@@ -228,6 +228,77 @@ def get_air_quality(lat, lon):
 # 5. OPENROUTESERVICE
 # ==========================================
 
+def has_repeated_sections(route, tolerance_m=15):
+    """
+    Check whether a running route uses the same
+    road/path section more than once.
+
+    Returns True if repeated sections are detected.
+    """
+
+    coordinates = route["coordinates"]
+
+    if len(coordinates) < 3:
+        return False
+
+    # Convert coordinates to approximate metre-based positions
+    mean_lat = sum(p[1] for p in coordinates) / len(coordinates)
+
+    scale_x = 111320 * math.cos(math.radians(mean_lat))
+    scale_y = 111320
+
+    points = [
+        (p[0] * scale_x, p[1] * scale_y)
+        for p in coordinates
+    ]
+
+    # Resample route at approximately 10-metre intervals
+    samples = []
+    cumulative_distance = 0
+
+    for i in range(1, len(points)):
+        x1, y1 = points[i - 1]
+        x2, y2 = points[i]
+
+        segment_length = math.hypot(x2 - x1, y2 - y1)
+
+        if segment_length == 0:
+            continue
+
+        steps = max(1, math.ceil(segment_length / 10))
+
+        for j in range(steps):
+            fraction = j / steps
+
+            x = x1 + (x2 - x1) * fraction
+            y = y1 + (y2 - y1) * fraction
+
+            samples.append((x, y, cumulative_distance + segment_length * fraction))
+
+        cumulative_distance += segment_length
+
+    # Detect repeated locations far apart along the route
+    visited = {}
+
+    for x, y, distance_along_route in samples:
+
+        cell = (
+            round(x / tolerance_m),
+            round(y / tolerance_m)
+        )
+
+        if cell in visited:
+
+            previous_distance = visited[cell]
+
+            # Ignore neighbouring points on the same section
+            if distance_along_route - previous_distance > 100:
+                return True
+
+        else:
+            visited[cell] = distance_along_route
+
+    return False
 def get_running_route(lat, lon, distance, seed):
 
     url = (
@@ -594,18 +665,22 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
             routes = []
             errors = []
 
-            for seed in range(1, 9):
+            for seed in range(1, 16):
                 if len(routes) >= 3:
                     break
 
                 try:
-                    route = get_running_route(lat, lon, distance, seed)
+                 route = get_running_route(lat, lon, distance, seed)
 
-                    duplicate = any(
-                        route["coordinates"] == existing["coordinates"]
-                        for existing in routes
-                    )
+                # Reject routes that repeat the same path
+                if has_repeated_sections(route):
+                    continue
 
+                # Avoid identical routes
+                duplicate = any(
+                    route["coordinates"] == existing["coordinates"]
+                    for existing in routes
+                )
                     if duplicate:
                         continue
 
