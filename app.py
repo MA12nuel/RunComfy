@@ -2,6 +2,7 @@ import streamlit as st
 import requests
 import folium
 import math
+import re
 from pathlib import Path
 from streamlit_searchbox import st_searchbox
 from streamlit_folium import st_folium
@@ -506,31 +507,38 @@ def preference_warnings(route, preferences):
 
 st.header("📍 Choose your starting point")
 
-address = st.text_input(
-    "Enter any Swiss address or location",
-    placeholder="e.g. Bahnhof Chur, St. Gallen, Zurich"
+selected_location = st_searchbox(
+    location_suggestions,
+    label="Enter any Swiss address or location",
+    placeholder="e.g. Bahnhof Chur, St. Gallen, Zurich",
+    key="start_location_search",
+    debounce=300,
+    default_use_searchterm=True,
+    clear_on_submit=True,
+    submit_function=on_location_selected,
 )
 
+if st.session_state.get("location_search_error"):
+    st.warning(
+        f"Live location suggestions are unavailable: "
+        f"{st.session_state.location_search_error}"
+    )
+
 if st.button("🔎 Search location"):
-
-    if address.strip():
-
+    if isinstance(selected_location, dict):
+        set_start_location(selected_location)
+    elif isinstance(selected_location, str) and selected_location.strip():
         try:
-            location = search_location(address)
-
-            if location:
-                st.session_state.start = location
-                st.session_state.start_source = "search"
-                st.session_state.start_label = f"Search result for: {address.strip()}"
-                st.session_state.routes = []
-                st.success("Location found!")
-                st.rerun()
-
+            matches = search_locations(selected_location)
+            if matches:
+                set_start_location(matches[0])
             else:
                 st.warning("Location not found in Switzerland.")
-
         except Exception as error:
             st.error(f"Location search failed: {error}")
+
+if st.session_state.pop("location_notice", False):
+    st.success("Location found!")
 
 
 st.write("Or select your starting point on the map:")
