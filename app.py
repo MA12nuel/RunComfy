@@ -661,35 +661,36 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
                 )
                 st.stop()
 
-            # Generate routes
-            routes = []
-            errors = []
+                       # Generate routes
+                        routes = []
+                        errors = []
 
-            for seed in range(1, 16):
-                if len(routes) >= 3:
-                    break
+                        for seed in range(1, 16):
+                            if len(routes) >= 3:
+                                break
 
-                try:
-                 route = get_running_route(lat, lon, distance, seed)
+                        try:
+                            route = get_running_route(lat, lon, distance, seed)
 
-                # Reject routes that repeat the same path
-                if has_repeated_sections(route):
-                    continue
+                            # Reject routes with repeated sections
+                            if has_repeated_sections(route):
+                                 continue
 
-                # Avoid identical routes
-                duplicate = any(
-                    route["coordinates"] == existing["coordinates"]
-                    for existing in routes
-                )
-                    if duplicate:
-                        continue
+                            # Avoid identical routes
+                            duplicate = any(
+                                route["coordinates"] == existing["coordinates"]
+                                for existing in routes
+                            )
 
-                    routes.append(route)
+                            if duplicate:
+                                continue
 
-                except Exception as error:
-                    errors.append(f"Seed {seed}: {error}")
-                    continue
+                            routes.append(route)
 
+                        except Exception as error:
+                            errors.append(f"Seed {seed}: {error}")
+                            continue
+                    
             if not routes:
                 st.error("No running routes found. Try another location or distance.")
                 if errors:
