@@ -455,7 +455,7 @@ def preference_warnings(route, preferences):
                 f"Elevation mismatch: {gain_per_km:.1f} m gain/km; "
                 f"{preferences['hill_preference']} accepts {minimum:g}–{maximum:g} m gain/km."
             )
-    
+    return warnings
 
 # ==========================================
 # 9. USER INTERFACE
