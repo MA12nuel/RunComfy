@@ -300,9 +300,8 @@ def calculate_score(
     gain = number(route.get("elevation"))
     if gain is not None and gain < 0:
         gain = None
-    temperature, aqi  number(temperature), number(aqi)
-    if shade is not None and not 0 <= shade <= 100:
-        shade = None
+    temperature, aqi = number(temperature), number(aqi)
+    
     distance_score = (
         max(0, 30 - abs(route_distance - target_distance) * 6)
         if route_distance is not None else None
@@ -386,17 +385,7 @@ def preference_warnings(route, preferences):
                 f"Elevation mismatch: {gain_per_km:.1f} m gain/km; "
                 f"{preferences['hill_preference']} accepts {minimum:g}–{maximum:g} m gain/km."
             )
-    coverage = number(route.get("shade"))
-    if coverage is None or not 0 <= coverage <= 100:
-        warnings.append("Forest coverage unavailable — the shade preference could not be checked.")
-    elif not preferences["shade_min"] <= coverage <= preferences["shade_max"]:
-        warnings.append(
-            f"Shade preference mismatch: {coverage:g}% forest coverage (shade proxy); "
-            f"{preferences['shade_preference']} accepts "
-            f"{preferences['shade_min']:g}–{preferences['shade_max']:g}%."
-        )
-    return warnings
-
+    
 
 # ==========================================
 # 9. USER INTERFACE
@@ -544,7 +533,6 @@ with col2:
 # 11. GENERATE RUNNING ROUTES
 # ==========================================
 
-st.caption("Forest coverage is a shade proxy, not a measurement of actual shade.")
 
 with st.expander("Preference warning thresholds"):
     st.caption(
@@ -568,22 +556,8 @@ with st.expander("Preference warning thresholds"):
             "Minimum Hilly elevation gain per km (m/km)",
             min_value=0.0, value=10.0, step=1.0
         )
-    st.caption(
-        "Forest coverage defaults: High ≥70%, Medium 30–70%, Low ≤30%. "
-        "All boundaries are inclusive. Coverage estimates the share of sampled "
-        "route points inside mapped forest, not the share of route length in shade."
-    )
-    if shade_preference == "High":
-        shade_min = st.number_input("Minimum High forest coverage (%)", 0.0, 100.0, 70.0)
-        shade_max = 100.0
-    elif shade_preference == "Low":
-        shade_min = 0.0
-        shade_max = st.number_input("Maximum Low forest coverage (%)", 0.0, 100.0, 30.0)
-    else:
-        shade_min = st.number_input("Minimum Medium forest coverage (%)", 0.0, 100.0, 30.0)
-        shade_max = st.number_input("Maximum Medium forest coverage (%)", 0.0, 100.0, 70.0)
-
-preferences = dict(
+   
+    preferences = dict(
     distance=distance, fitness=fitness, hill_preference=hill_preference,
     distance_tolerance_pct=distance_tolerance_pct,
     elevation_min=elevation_min, elevation_max=elevation_max,
