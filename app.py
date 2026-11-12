@@ -6,7 +6,6 @@ import re
 from pathlib import Path
 from streamlit_searchbox import st_searchbox
 from streamlit_folium import st_folium
-from shapely.geometry import Point, Polygon
 
 # ==========================================
 # 1. RUNCOMFY AI SETTINGS
@@ -34,9 +33,8 @@ st.markdown("""
 
 # API keys from Streamlit Secrets
 ORS_KEY = st.secrets.get("ORS_API_KEY")
-OVERPASS_KEY = st.secrets.get("OVERPASS_API_KEY")
 
-if not ORS_KEY or not OVERPASS_KEY:
+if not ORS_KEY:
     st.error(
         "Missing API keys. Please add ORS_API_KEY and OVERPASS_API_KEY "
         "to your Streamlit secrets."
@@ -282,100 +280,6 @@ def get_running_route(lat, lon, distance, seed):
 
 
 # ==========================================
-# 6. OVERPASS.CH FOREST DATA
-# ==========================================
-
-@st.cache_data(ttl=86400)
-def get_forests(south, west, north, east):
-
-    query = f"""
-    [out:json][timeout:25];
-    (
-      way["landuse"="forest"]({south},{west},{north},{east});
-      way["natural"="wood"]({south},{west},{north},{east});
-    );
-    out geom;
-    """
-
-    response = requests.post(
-        "https://api.overpass.ch/v1/interpreter",
-        headers={
-            "X-API-Key": OVERPASS_KEY,
-            "User-Agent": HEADERS["User-Agent"]
-        },
-        data={"data": query},
-        timeout=45
-    )
-
-    response.raise_for_status()
-
-    return response.json()["elements"]
-
-
-# ==========================================
-# 7. SHADE ESTIMATION
-# ==========================================
-
-def estimate_shade(route, forests):
-    polygons = []
-
-    for forest in forests:
-        geometry = forest.get("geometry", [])
-
-        if not geometry or len(geometry) < 3:
-            continue
-
-        coordinates = []
-        for point in geometry:
-            if not isinstance(point, dict):
-                continue
-            if "lon" in point and "lat" in point:
-                try:
-                    coordinates.append((float(point["lon"]), float(point["lat"])))
-                except (TypeError, ValueError):
-                    continue
-
-        if len(coordinates) < 3:
-            continue
-
-        if coordinates[0] != coordinates[-1]:
-            coordinates.append(coordinates[0])
-
-        polygon = Polygon(coordinates)
-
-        if polygon.is_valid and not polygon.is_empty:
-            polygons.append(polygon)
-
-    if not polygons:
-        return None
-
-    route_points = route["coordinates"]
-
-    step = max(1, len(route_points) // 100)
-    samples = [
-        point for point in route_points[::step]
-        if len(point) >= 2 and number(point[0]) is not None and number(point[1]) is not None
-    ]
-
-    if not samples:
-        return None
-
-    inside_forest = 0
-
-    for coordinate in samples:
-        if len(coordinate) < 2:
-            continue
-
-        point = Point(float(coordinate[0]), float(coordinate[1]))
-
-        if any(polygon.covers(point) for polygon in polygons):
-            inside_forest += 1
-
-    shade = 100 * inside_forest / len(samples)
-    return round(shade)
-
-
-# ==========================================
 # 8. RUNCOMFY SCORE
 # ==========================================
 
@@ -384,10 +288,8 @@ def calculate_score(
     target_distance,
     fitness,
     hill_preference,
-    shade_preference,
     temperature,
     aqi,
-    shade,
     return_breakdown=False
 ):
 
@@ -398,7 +300,7 @@ def calculate_score(
     gain = number(route.get("elevation"))
     if gain is not None and gain < 0:
         gain = None
-    temperature, aqi, shade = number(temperature), number(aqi), number(shade)
+    temperature, aqi  number(temperature), number(aqi)
     if shade is not None and not 0 <= shade <= 100:
         shade = None
     distance_score = (
@@ -429,28 +331,7 @@ def calculate_score(
         15 - max(0, aqi - 20) * 0.3
     ) if aqi is not None else None
 
-    # Shade: maximum 10 points
-    if shade is None:
-        shade_score = None
-
-    elif shade_preference == "High":
-        shade_score = shade / 10
-
-    elif shade_preference == "Low":
-        shade_score = (100 - shade) / 10
-
-    elif shade_preference == "Medium":
-# prefer a moderate amount of shade
-        shade_score = max(0, 10 - abs(shade - 50) / 5)
-
-    else:
-        shade_score = 10
-
-    shade_rules = {
-        "High": "Forest coverage / 10",
-        "Low": "(100 - forest coverage) / 10",
-        "Medium": "max(0, 10 - abs(forest coverage - 50) / 5)",
-    }
+   
     components = [
         {"Factor": "Distance", "Points": distance_score, "Maximum": 30,
          "Input": f"{metric_text(route_distance, ' km')} / target {target_distance:g} km",
@@ -464,10 +345,8 @@ def calculate_score(
         {"Factor": "Air quality", "Points": air_score, "Maximum": 15,
          "Input": f"European AQI: {metric_text(aqi)}",
          "Calculation": "max(0, 15 - max(0, AQI - 20) × 0.3)"},
-        {"Factor": "Forest coverage (shade proxy)", "Points": shade_score, "Maximum": 10,
-         "Input": f"{metric_text(shade, '%')}; preference {shade_preference}",
-         "Calculation": shade_rules.get(shade_preference, "10")},
     ]
+
     available = [item for item in components if item["Points"] is not None]
     raw_total = sum(item["Points"] for item in available)
     available_max = sum(item["Maximum"] for item in available)
@@ -660,11 +539,6 @@ with col2:
         ["Flat", "Moderate", "Hilly"]
     )
 
-    shade_preference = st.selectbox(
-        "Shade preference",
-        ["High", "Medium", "Low"]
-    )
-
 
 # ==========================================
 # 11. GENERATE RUNNING ROUTES
@@ -711,11 +585,11 @@ with st.expander("Preference warning thresholds"):
 
 preferences = dict(
     distance=distance, fitness=fitness, hill_preference=hill_preference,
-    shade_preference=shade_preference, distance_tolerance_pct=distance_tolerance_pct,
+    distance_tolerance_pct=distance_tolerance_pct,
     elevation_min=elevation_min, elevation_max=elevation_max,
-    shade_min=shade_min, shade_max=shade_max
 )
-thresholds_valid = elevation_min <= elevation_max and shade_min <= shade_max
+
+thresholds_valid = elevation_min <= elevation_max
 if not thresholds_valid:
     st.warning("Each minimum warning threshold must be less than or equal to its maximum.")
 
@@ -820,10 +694,8 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
                     distance,
                     fitness,
                     hill_preference,
-                    shade_preference,
                     temperature,
                     aqi,
-                    route["shade"],
                     return_breakdown=True
                 )
                 route["score"] = route["score_breakdown"]["score"]
