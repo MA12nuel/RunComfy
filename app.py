@@ -106,7 +106,6 @@ def search_locations(address):
         params={
             "searchText": address,
             "type": "locations",
-            "origins": "address",
             "limit": 5,
             "sr": 4326,
         },
@@ -122,28 +121,21 @@ def search_locations(address):
         if lat is None or lon is None:
             continue
 
-        locations.append({
-            "label": attributes.get("label") or attributes.get("detail") or address,
-            "lat": lat,
-            "lon": lon,
-        })
+        label = attributes.get("label") or attributes.get("detail") or address
+        label = re.sub(r"<[^>]+>", "", str(label)).strip()
+        locations.append({"label": label, "lat": lat, "lon": lon})
 
     return locations
 
 
 def location_suggestions(searchterm):
     if len(searchterm.strip()) < 2:
-        st.session_state.location_search_error = None
         return []
 
-    try:
-        locations = search_locations(searchterm)
-    except requests.RequestException as error:
-        st.session_state.location_search_error = str(error)
-        return []
-
-    st.session_state.location_search_error = None
-    return [(location["label"], location) for location in locations]
+    return [
+        (location["label"], location)
+        for location in search_locations(searchterm)
+    ]
 
 
 def set_start_location(location):
@@ -156,6 +148,13 @@ def set_start_location(location):
 
 def on_location_selected(location):
     set_start_location(location)
+
+
+def search_location(address):
+    matches = search_locations(address)
+    if not matches:
+        return None
+    return matches[0]["lat"], matches[0]["lon"]
 
 # ==========================================
 # 3. WEATHER
