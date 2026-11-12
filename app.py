@@ -660,36 +660,36 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
                     "Weather or air-quality data is unavailable."
                 )
                 st.stop()
+            # Generate routes
+            routes = []
+            errors = []
 
-                       # Generate routes
-                        routes = []
-                        errors = []
+            for seed in range(1, 16):
+                if len(routes) >= 3:
+                    break
 
-                        for seed in range(1, 16):
-                            if len(routes) >= 3:
-                                break
+                try:
+                    route = get_running_route(lat, lon, distance, seed)
 
-                        try:
-                            route = get_running_route(lat, lon, distance, seed)
+                    # Reject routes with repeated sections
+                    if has_repeated_sections(route):
+                        continue
 
-                            # Reject routes with repeated sections
-                            if has_repeated_sections(route):
-                                 continue
+                    # Avoid identical routes
+                    duplicate = any(
+                        route["coordinates"] == existing["coordinates"]
+                        for existing in routes
+                    )
 
-                            # Avoid identical routes
-                            duplicate = any(
-                                route["coordinates"] == existing["coordinates"]
-                                for existing in routes
-                            )
+                    if duplicate:
+                        continue
 
-                            if duplicate:
-                                continue
+                    routes.append(route)
 
-                            routes.append(route)
-
-                        except Exception as error:
-                            errors.append(f"Seed {seed}: {error}")
-                            continue
+                except Exception as error:
+                    errors.append(f"Seed {seed}: {error}")
+                    continue
+                      
                     
             if not routes:
                 st.error("No running routes found. Try another location or distance.")
