@@ -156,6 +156,25 @@ def search_location(address):
         return None
     return matches[0]["lat"], matches[0]["lon"]
 
+def is_swiss_location(lat, lon):
+    response = requests.get(
+        "https://api3.geo.admin.ch/rest/services/api/MapServer/identify",
+        params={
+            "geometry": f"{lon},{lat}",
+            "geometryType": "esriGeometryPoint",
+            "imageDisplay": "500,500,96",
+            "mapExtent": f"{lon - 0.01},{lat - 0.01},{lon + 0.01},{lat + 0.01}",
+            "tolerance": 1,
+            "layers": "all:ch.swisstopo.swissboundaries3d-land-flaeche.fill",
+            "sr": 4326,
+            "returnGeometry": "false",
+        },
+        timeout=20,
+    )
+    response.raise_for_status()
+    return bool(response.json().get("results", []))
+
+
 # ==========================================
 # 3. WEATHER
 # ==========================================
