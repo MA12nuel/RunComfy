@@ -36,8 +36,7 @@ ORS_KEY = st.secrets.get("ORS_API_KEY")
 
 if not ORS_KEY:
     st.error(
-        "Missing API keys. Please add ORS_API_KEY and OVERPASS_API_KEY "
-        "to your Streamlit secrets."
+        "Missing API key. Please add ORS_API_KEY to your Streamlit secrets."
     )
     st.stop()
 
@@ -622,36 +621,7 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
                     st.code("\n".join(errors[:3]))
                 st.stop()
 
-            # Get forest data for route area
-            all_coordinates = [
-                point
-                for route in routes
-                for point in route["coordinates"]
-            ]
-
-            lons = [p[0] for p in all_coordinates]
-            lats = [p[1] for p in all_coordinates]
-
-            south = min(lats) - 0.002
-            north = max(lats) + 0.002
-            west = min(lons) - 0.002
-            east = max(lons) + 0.002
-
-            forests = []
-            forest_error = None
-
-            try:
-
-                forests = get_forests(
-                    south,
-                    west,
-                    north,
-                    east
-                )
-
-            except Exception as error:
-                forest_error = str(error)
-
+        
             # Score routes
             for route in routes:
 
@@ -683,8 +653,7 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
             st.session_state.weather = weather
             st.session_state.air = air
 
-            st.session_state.forest_error = forest_error
-
+            
         except Exception as error:
 
             st.error(f"An error occurred: {error}")
@@ -719,7 +688,6 @@ if st.session_state.routes:
             f"{saved_preferences['hill_preference']} elevation · {saved_preferences['shade_preference']} shade. "
             f"Warning thresholds: distance ±{saved_preferences['distance_tolerance_pct']:g}%; "
             f"elevation {saved_preferences['elevation_min']:g}–{saved_preferences['elevation_max']:g} m/km; "
-            f"forest coverage {saved_preferences['shade_min']:g}–{saved_preferences['shade_max']:g}%."
         )
 
     st.header("🌤️ Current running conditions")
@@ -751,16 +719,7 @@ if st.session_state.routes:
         f"{metric_text(weather.get('precipitation'), ' mm')}"
     )
 
-    if st.session_state.get("forest_error"):
-
-        st.warning(
-            "Forest data could not be loaded. "
-            "Shade scoring is unavailable."
-        )
-
-        with st.expander("Technical details"):
-            st.code(st.session_state.forest_error)
-
+   
     # ======================================
     # ROUTE MAP
     # ======================================
@@ -844,19 +803,7 @@ if st.session_state.routes:
             metric_text(route.get('score'), '/100', 0)
         )
 
-        if number(route.get("shade")) is not None:
-
-            st.write(
-                f"🌳 Forest coverage (shade proxy): "
-                f"{route['shade']}%"
-            )
-
-        else:
-
-            st.write(
-                "🌳 Forest coverage (shade proxy): unavailable"
-            )
-
+       
         for message in route.get("preference_warnings", []):
             st.warning(message)
 
@@ -881,7 +828,7 @@ if st.session_state.routes:
                         f"Available total: {breakdown['raw_total']:.2f} / {maximum}. "
                         f"Rescaled to 100 and rounded: {breakdown['score']}/100."
                     )
-                    st.caption("Missing factors are excluded, not treated as zero. With forest coverage missing, the original calculation rescales the available 90 points to 100; the same policy applies to missing route metrics.")
+                    st.caption("Missing factors are excluded, not treated as zero; the same policy applies to missing route metrics.")
                 st.caption(
                     "Elevation scoring penalizes gain above its limit; it does not reward a minimum amount of hills. "
                     "Preference warnings are separate checks and do not deduct points. "
@@ -899,9 +846,6 @@ if st.session_state.routes:
     st.caption(
         "RunComfy AI uses real routing, weather and "
         "air-quality data. Scores are rule-based. "
-        "Forest coverage is only a proxy for shade. "
-        "Actual shade depends on sunlight, trees, "
-        "buildings and time of day."
     )
 
     st.caption(
