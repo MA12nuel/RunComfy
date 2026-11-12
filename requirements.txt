@@ -3,3 +3,4 @@ requests
 folium
 streamlit-folium
 shapely>=2.0
+streamlit-searchbox>=0.1.24

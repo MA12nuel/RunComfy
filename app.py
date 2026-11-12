@@ -3,7 +3,7 @@ import requests
 import folium
 import math
 from pathlib import Path
-
+from streamlit_searchbox import st_searchbox
 from streamlit_folium import st_folium
 from shapely.geometry import Point, Polygon
 
@@ -95,7 +95,10 @@ if "routes" not in st.session_state:
 # ==========================================
 
 @st.cache_data(ttl=86400)
-def search_location(address):
+def search_locations(address):
+    address = address.strip()
+    if len(address) < 2:
+        return []
 
     response = requests.get(
         "https://api3.geo.admin.ch/rest/services/api/SearchServer",
@@ -104,60 +107,54 @@ def search_location(address):
             "type": "locations",
             "origins": "address",
             "limit": 5,
-            "sr": 4326
-        },
-        timeout=20
-    )
-
-    response.raise_for_status()
-
-    results = response.json().get("results", [])
-
-    if not results:
-        return None
-
-    attributes = results[0]["attrs"]
-
-    # Coordinates in WGS84
-    lat = float(attributes["lat"])
-    lon = float(attributes["lon"])
-
-    return lat, lon
-def is_swiss_location(lat, lon):
-
-    response = requests.get(
-
-        "https://api3.geo.admin.ch/rest/services/api/MapServer/identify",
-
-        params={
-
-            "geometry": f"{lon},{lat}",
-
-            "geometryType": "esriGeometryPoint",
-
-            "imageDisplay": "500,500,96",
-
-            "mapExtent": f"{lon-0.01},{lat-0.01},{lon+0.01},{lat+0.01}",
-
-            "tolerance": 1,
-
-            "layers": "all:ch.swisstopo.swissboundaries3d-land-flaeche.fill",
-
             "sr": 4326,
-
-            "returnGeometry": "false"
-
         },
-
-        timeout=20
-
+        timeout=20,
     )
-
     response.raise_for_status()
 
-    results = response.json().get("results", [])
+    locations = []
+    for result in response.json().get("results", []):
+        attributes = result.get("attrs", {})
+        lat = number(attributes.get("lat"))
+        lon = number(attributes.get("lon"))
+        if lat is None or lon is None:
+            continue
 
-    return len(results) > 0
+        locations.append({
+            "label": attributes.get("label") or attributes.get("detail") or address,
+            "lat": lat,
+            "lon": lon,
+        })
+
+    return locations
+
+
+def location_suggestions(searchterm):
+    if len(searchterm.strip()) < 2:
+        st.session_state.location_search_error = None
+        return []
+
+    try:
+        locations = search_locations(searchterm)
+    except requests.RequestException as error:
+        st.session_state.location_search_error = str(error)
+        return []
+
+    st.session_state.location_search_error = None
+    return [(location["label"], location) for location in locations]
+
+
+def set_start_location(location):
+    st.session_state.start = (location["lat"], location["lon"])
+    st.session_state.start_source = "search"
+    st.session_state.start_label = location["label"]
+    st.session_state.routes = []
+    st.session_state.location_notice = True
+
+
+def on_location_selected(location):
+    set_start_location(location)
 
 # ==========================================
 # 3. WEATHER
