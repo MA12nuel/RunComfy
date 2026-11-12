@@ -47,7 +47,7 @@ HEADERS = {
 }
 
 # Scoring limits are unchanged. Warning thresholds are configurable in the UI.
-DEFAULT_START = (47.2553,9.2229)
+DEFAULT_START = (47.43174,9.37464)
 FITNESS_LIMITS = {"Beginner": 10, "Intermediate": 25, "Advanced": 45}
 HILL_MULTIPLIERS = {"Flat": 0.5, "Moderate": 1, "Hilly": 2}
 
