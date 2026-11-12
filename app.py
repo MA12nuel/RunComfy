@@ -681,14 +681,7 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
             # Score routes
             for route in routes:
 
-                if forest_error:
-                    route["shade"] = None
-                else:
-                    route["shade"] = estimate_shade(
-                        route,
-                        forests
-                    )
-
+              
                 route["score_breakdown"] = calculate_score(
                     route,
                     distance,
