@@ -760,10 +760,12 @@ if st.session_state.routes:
         st.info("These routes use the default starting location: St. Gallen.")
     if saved_preferences:
         st.caption(
-            f"Generated for {saved_preferences['distance']:g} km · {saved_preferences['fitness']} · "
-            f"{saved_preferences['hill_preference']} elevation · {saved_preferences['shade_preference']} shade. "
+            f"Generated for {saved_preferences['distance']:g} km · "
+            f"{saved_preferences['fitness']} · "
+            f"{saved_preferences['hill_preference']} elevation. "
             f"Warning thresholds: distance ±{saved_preferences['distance_tolerance_pct']:g}%; "
-            f"elevation {saved_preferences['elevation_min']:g}–{saved_preferences['elevation_max']:g} m/km; "
+            f"elevation {saved_preferences['elevation_min']:g}–"
+            f"{saved_preferences['elevation_max']:g} m/km."
         )
 
     st.header("🌤️ Current running conditions")
