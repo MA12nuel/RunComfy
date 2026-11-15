@@ -647,11 +647,22 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
                         lat, lon, distance, seed
                     )
 
+                    # Reject routes outside the allowed distance range
+                    actual_distance = route.get("distance")
+
+                    if actual_distance is None:
+                        continue
+
+                    tolerance = distance * distance_tolerance_pct / 100
+
+                    if abs(actual_distance - distance) > tolerance:
+                        continue
+
                     # Reject routes with repeated sections
                     if has_repeated_sections(route):
                         rejected_routes += 1
                         continue
-
+                        
                     # Avoid identical routes
                     duplicate = any(
                         route["coordinates"] == existing["coordinates"]
