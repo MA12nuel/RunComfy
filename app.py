@@ -3,6 +3,9 @@ import requests
 import folium
 import math
 import re
+import osmnx as ox
+import networkx as nx
+import random
 from pathlib import Path
 from streamlit_searchbox import st_searchbox
 from streamlit_folium import st_folium
@@ -31,15 +34,6 @@ st.markdown("""
 <p class="subtitle">Find a comfortable running route in Switzerland.</p>
 """, unsafe_allow_html=True)
 
-
-# API keys from Streamlit Secrets
-ORS_KEY = st.secrets.get("ORS_API_KEY")
-
-if not ORS_KEY:
-    st.error(
-        "Missing API key. Please add ORS_API_KEY to your Streamlit secrets."
-    )
-    st.stop()
 
 HEADERS = {
     "User-Agent": "RunComfySchoolProject/1.0 (contact: hello@runcomfy.app)"
@@ -224,101 +218,186 @@ def get_air_quality(lat, lon):
 
     return response.json()["current"]
 
-
 # ==========================================
-# 5. OPENROUTESERVICE
+# 5. RUNNING ROUTE GENERATION
+# OSMnx + NetworkX
 # ==========================================
 
-def has_repeated_sections(route, min_overlap_m=50):
-    """
-    Detect repeated route sections while allowing normal crossings.
-    """
+@st.cache_resource(ttl=3600)
+def load_running_network(lat, lon):
 
-    coordinates = route.get("coordinates", [])
+    graph = ox.graph_from_point(
+        (lat, lon),
+        dist=12000,
+        network_type="walk",
+        simplify=True
+    )
 
-    if len(coordinates) < 4:
-        return False
+    graph = ox.project_graph(graph)
 
-    mean_lat = sum(p[1] for p in coordinates) / len(coordinates)
+    return graph
 
-    scale_x = 111320 * math.cos(math.radians(mean_lat))
-    scale_y = 111320
 
-    points = [
-        (p[0] * scale_x, p[1] * scale_y)
-        for p in coordinates
-    ]
+def route_length(graph, nodes):
 
-    segments = []
+    length = 0
 
-    for i in range(len(points) - 1):
-        if points[i] != points[i + 1]:
-            segments.append(
-                LineString([points[i], points[i + 1]])
-            )
+    for u, v in zip(nodes[:-1], nodes[1:]):
+        edge_data = graph.get_edge_data(u, v)
 
-    for i, segment_a in enumerate(segments):
+        if not edge_data:
+            return None
 
-        for j in range(i + 2, len(segments)):
+        length += min(
+            edge["length"]
+            for edge in edge_data.values()
+        )
 
-            segment_b = segments[j]
+    return length
 
-            intersection = segment_a.intersection(segment_b)
-
-            if intersection.length >= min_overlap_m:
-                return True
-
-    return False
 
 def get_running_route(lat, lon, distance, seed):
 
-    url = (
-        "https://api.openrouteservice.org"
-        "/v2/directions/foot-walking/geojson"
+    graph = load_running_network(lat, lon)
+
+    start = ox.distance.nearest_nodes(
+        graph,
+        X=ox.projection.project_geometry(
+            __import__("shapely").geometry.Point(lon, lat),
+            to_crs=graph.graph["crs"]
+        )[0].x,
+        Y=ox.projection.project_geometry(
+            __import__("shapely").geometry.Point(lon, lat),
+            to_crs=graph.graph["crs"]
+        )[0].y
     )
 
-    response = requests.post(
-        url,
-        headers={
-            "Authorization": ORS_KEY,
-            "Content-Type": "application/json"
-        },
-        json={
-            "coordinates": [[lon, lat]],
-            "elevation": True,
-            "options": {
-                "avoid_features": ["ferries"],
-                "round_trip": {
-                    "length": distance * 1000,
-                    "points": 5,
-                    "seed": seed
-                }
-            }
-        },
-        timeout=60
+    random_generator = random.Random(seed)
+
+    # Find candidate nodes approximately half
+    # the requested distance from the start.
+
+    distances = nx.single_source_dijkstra_path_length(
+        graph,
+        start,
+        cutoff=distance * 1000,
+        weight="length"
     )
 
-    response.raise_for_status()
+    candidates = [
+        node
+        for node, meters in distances.items()
+        if distance * 250 <= meters <= distance * 550
+    ]
 
-    feature = response.json()["features"][0]
+    if not candidates:
+        raise ValueError(
+            "No suitable running paths found nearby."
+        )
 
-    coordinates = feature["geometry"]["coordinates"]
+    random_generator.shuffle(candidates)
 
-    distance_m = number(feature.get("properties", {}).get("summary", {}).get("distance"))
-    actual_distance = distance_m / 1000 if distance_m is not None and distance_m > 0 else None
+    best_route = None
+    best_difference = float("inf")
 
-    # Calculate elevation gain
-    heights = [number(point[2]) if len(point) > 2 else None for point in coordinates]
-    elevation_gain = None
-    if len(heights) >= 2 and all(height is not None for height in heights):
-        elevation_gain = round(sum(max(0, b - a) for a, b in zip(heights, heights[1:])))
+    for candidate in candidates[:35]:
+
+        try:
+            outward = nx.shortest_path(
+                graph,
+                start,
+                candidate,
+                weight="length"
+            )
+
+            # Prefer a different return path
+            return_graph = graph.copy()
+
+            for u, v in zip(outward[:-1], outward[1:]):
+                if return_graph.has_edge(u, v):
+                    return_graph.remove_edges_from(
+                        [(u, v, key) for key in
+                         list(return_graph[u][v].keys())]
+                    )
+
+                if return_graph.has_edge(v, u):
+                    return_graph.remove_edges_from(
+                        [(v, u, key) for key in
+                         list(return_graph[v][u].keys())]
+                    )
+
+            try:
+                backward = nx.shortest_path(
+                    return_graph,
+                    candidate,
+                    start,
+                    weight="length"
+                )
+
+            except nx.NetworkXNoPath:
+
+                backward = nx.shortest_path(
+                    graph,
+                    candidate,
+                    start,
+                    weight="length"
+                )
+
+            full_route = outward + backward[1:]
+
+            actual_length = route_length(
+                graph,
+                full_route
+            )
+
+            if actual_length is None:
+                continue
+
+            difference = abs(
+                actual_length / 1000 - distance
+            )
+
+            if difference < best_difference:
+                best_difference = difference
+                best_route = full_route
+
+        except (nx.NetworkXNoPath, nx.NodeNotFound):
+            continue
+
+    if best_route is None:
+        raise ValueError(
+            "Could not generate a suitable loop."
+        )
+
+    # Convert projected coordinates back
+    # to latitude and longitude
+
+    coordinates = []
+
+    for node in best_route:
+
+        x = graph.nodes[node]["x"]
+        y = graph.nodes[node]["y"]
+
+        point, _ = ox.projection.project_geometry(
+            __import__("shapely").geometry.Point(x, y),
+            crs=graph.graph["crs"],
+            to_latlong=True
+        )
+
+        coordinates.append([
+            point.x,
+            point.y
+        ])
 
     return {
         "coordinates": coordinates,
-        "distance": actual_distance,
-        "elevation": elevation_gain
+        "distance": route_length(
+            graph,
+            best_route
+        ) / 1000,
+        "elevation": None
     }
-
 
 # ==========================================
 # 8. RUNCOMFY SCORE
@@ -671,10 +750,7 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
                         continue
 
                     # 3. Prefer routes without repeated sections
-                    if has_repeated_sections(route):
-                        fallback_routes.append(route)
-                    else:
-                        clean_routes.append(route)
+                    clean_routes.append(route)
 
                     # Stop once 3 clean routes are found
                     if len(clean_routes) >= 3:
