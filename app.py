@@ -641,7 +641,7 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
             rejected_distance = 0
 
             # Try different round-trip routes
-            for seed in range(1, 16):
+            for seed in range(1, 7):
 
                 try:
                     route = get_running_route(
