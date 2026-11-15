@@ -634,57 +634,67 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
            
             # Generate routes
             routes = []
+            clean_routes = []
+            fallback_routes = []
             errors = []
-            rejected_routes = 0
 
+            rejected_distance = 0
+
+            # Try different round-trip routes
             for seed in range(1, 16):
-
-                if len(routes) >= 3:
-                    break
 
                 try:
                     route = get_running_route(
                         lat, lon, distance, seed
                     )
 
-                    # Reject routes outside the allowed distance range
+                    # 1. Check actual distance
                     actual_distance = route.get("distance")
 
                     if actual_distance is None:
+                        rejected_distance += 1
                         continue
 
                     tolerance = distance * distance_tolerance_pct / 100
 
                     if abs(actual_distance - distance) > tolerance:
+                        rejected_distance += 1
                         continue
 
-                    # Reject routes with repeated sections
-                    if has_repeated_sections(route):
-                        rejected_routes += 1
-                        continue
-                        
-                    # Avoid identical routes
+                    # 2. Avoid identical routes
                     duplicate = any(
                         route["coordinates"] == existing["coordinates"]
-                        for existing in routes
+                        for existing in clean_routes + fallback_routes
                     )
 
                     if duplicate:
                         continue
 
-                    routes.append(route)
+                    # 3. Prefer routes without repeated sections
+                    if has_repeated_sections(route):
+                        fallback_routes.append(route)
+                    else:
+                        clean_routes.append(route)
+
+                    # Stop once 3 clean routes are found
+                    if len(clean_routes) >= 3:
+                        break
 
                 except Exception as error:
                     errors.append(f"Seed {seed}: {error}")
 
+            # 4. Prefer clean routes, use fallback only if necessary
+            routes = clean_routes[:3]
+
+            if len(routes) < 3:
+                missing = 3 - len(routes)
+                routes.extend(fallback_routes[:missing])
+
+            # 5. Show messages
             if not routes:
                 st.error(
-                    "No suitable loop routes found without detected repeated sections. "
-                    "Try another starting point or distance."
-                )
-
-                st.info(
-                    f"Routes rejected due to repeated sections: {rejected_routes}"
+                    "No routes found within your selected distance range. "
+                    "Try another starting point, distance or tolerance."
                 )
 
                 if errors:
@@ -692,12 +702,18 @@ if st.button("🚀 Find my perfect running route", disabled=not thresholds_valid
 
                 st.stop()
 
+            if fallback_routes and len(clean_routes) < 3:
+                st.info(
+                    "Some routes may contain repeated sections because "
+                    "not enough suitable loop routes were available."
+                )
+
             if len(routes) < 3:
                 st.info(
-                    f"Found {len(routes)} suitable routes. "
-                    "Not enough routes passed the validation to show three."
+                    f"Found {len(routes)} suitable routes within "
+                    "your selected distance range."
                 )
-          
+            
             # Score routes
             for route in routes:
 
