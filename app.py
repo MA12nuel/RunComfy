@@ -268,7 +268,7 @@ def has_repeated_sections(route, min_overlap_m=50):
             if intersection.length >= min_overlap_m:
                 return True
 
-   return False
+    return False
 
 def get_running_route(lat, lon, distance, seed):
 
